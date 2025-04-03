@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Validator & Formatter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { 'sans': ['Lato', 'sans-serif'], },
+                    colors: {
+                        'accent': { 'DEFAULT': '#007ACC', 'dark': '#005f9e' },
+                        'light-bg': '#f8f9fa',
+                        'dark-text': '#212529',
+                        'secondary-text': '#6c757d',
+                        'success-bg': '#dcfce7', // green-100
+                        'success-border': '#bbf7d0', // green-200
+                        'success-text': '#15803d', // green-700
+                        'error-bg': '#fee2e2', // red-100
+                        'error-border': '#fecaca', // red-200
+                        'error-text': '#b91c1c', // red-700
+                        'warning-bg': '#fef9c3', // yellow-100
+                        'warning-border': '#fef08a', // yellow-200
+                        'warning-text': '#a16207', // yellow-700
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-light-bg font-sans text-dark-text antialiased">
+
+    <!-- Simple Header with Back Link -->
+    <header class="bg-white shadow-sm">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-accent">JSON Validator & Formatter</h1>
+            <a href="index.html" class="text-sm text-accent hover:underline">&larr; Back to Dashboard</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200 max-w-4xl mx-auto">
+
+            <!-- Input Area -->
+            <div class="mb-4">
+                <label for="json-input" class="block text-sm font-medium text-secondary-text mb-1">Enter JSON:</label>
+                <textarea id="json-input" rows="15" placeholder='{ "key": "value", "number": 123, "arr": [1,true,null,"str"] }' class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-accent focus:border-accent text-sm font-mono"></textarea>
+            </div>
+
+            <!-- Action Row -->
+            <div class="flex flex-wrap items-center gap-4 mb-4">
+                <button id="validate-json-btn" class="bg-accent text-white px-4 py-2 rounded-md hover:bg-accent-dark transition duration-300 text-sm">Validate</button>
+                <button id="format-json-btn" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition duration-300 text-sm">Format</button>
+                <div class="flex items-center gap-2 ml-auto">
+                     <label for="indent-select" class="text-sm text-secondary-text whitespace-nowrap">Indent:</label>
+                     <select id="indent-select" class="text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-accent focus:border-accent bg-white">
+                         <option value="2" selected>2 Spaces</option>
+                         <option value="4">4 Spaces</option>
+                         <option value="tab">\t (Tab)</option>
+                     </select>
+                 </div>
+            </div>
+
+            <!-- Status/Result Area -->
+            <div id="json-result" class="text-sm p-3 rounded-md border min-h-[40px] mb-4">
+                <!-- Validation/Formatting status appears here -->
+            </div>
+
+            <!-- Formatted Output Area -->
+            <div>
+                <label for="json-output-format" class="block text-sm font-medium text-secondary-text mb-1">Formatted Output:</label>
+                <textarea id="json-output-format" rows="20" readonly class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm font-mono"></textarea>
+                 <button id="copy-output-btn" class="mt-2 bg-gray-500 text-white px-3 py-1 rounded-md hover:bg-gray-600 transition duration-300 text-xs opacity-0 transition-opacity" title="Copy Formatted JSON">Copy Output</button>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        const jsonInput = document.getElementById('json-input');
+        const validateBtn = document.getElementById('validate-json-btn');
+        const formatBtn = document.getElementById('format-json-btn');
+        const indentSelect = document.getElementById('indent-select');
+        const resultDiv = document.getElementById('json-result');
+        const jsonOutput = document.getElementById('json-output-format');
+        const copyBtn = document.getElementById('copy-output-btn');
+
+        function setResult(message, type = 'info') {
+            if (!resultDiv) return;
+            resultDiv.textContent = message;
+            // Reset classes first
+            resultDiv.className = 'text-sm p-3 rounded-md border min-h-[40px]';
+            switch(type) {
+                case 'success':
+                    resultDiv.classList.add('bg-success-bg', 'border-success-border', 'text-success-text');
+                    break;
+                case 'error':
+                     resultDiv.classList.add('bg-error-bg', 'border-error-border', 'text-error-text');
+                    break;
+                case 'warning':
+                     resultDiv.classList.add('bg-warning-bg', 'border-warning-border', 'text-warning-text');
+                    break;
+                case 'info':
+                default:
+                     resultDiv.classList.add('bg-blue-50', 'border-blue-200', 'text-blue-700'); // Default info style
+                    break;
+            }
+        }
+
+        function clearOutput() {
+            if(jsonOutput) jsonOutput.value = '';
+            if(copyBtn) copyBtn.style.opacity = '0'; // Hide copy button
+        }
+
+        // --- Validation Logic ---
+        validateBtn?.addEventListener('click', () => {
+            clearOutput(); // Clear formatted output on validation
+            const jsonString = jsonInput.value.trim();
+
+            if (!jsonString) {
+                setResult('Please enter JSON to validate.', 'warning');
+                return;
+            }
+
+            try {
+                JSON.parse(jsonString);
+                setResult('Valid JSON!', 'success');
+            } catch (e) {
+                setResult(`Invalid JSON: ${e.message}`, 'error');
+            }
+        });
+
+        // --- Formatting Logic ---
+        formatBtn?.addEventListener('click', () => {
+            clearOutput(); // Clear previous formatted output
+            const jsonString = jsonInput.value.trim();
+
+            if (!jsonString) {
+                setResult('Please enter JSON to format.', 'warning');
+                return;
+            }
+
+            try {
+                const jsonObj = JSON.parse(jsonString); // Validate first
+
+                // Get indentation setting
+                let indentValue = indentSelect.value;
+                if (indentValue === 'tab') {
+                    indentValue = '\t';
+                } else {
+                    indentValue = parseInt(indentValue, 10);
+                }
+
+                const formattedJson = JSON.stringify(jsonObj, null, indentValue);
+                if(jsonOutput) jsonOutput.value = formattedJson;
+
+                // Show success message in result div
+                setResult('JSON Formatted Successfully.', 'success');
+                if(copyBtn) copyBtn.style.opacity = '1'; // Show copy button
+
+            } catch (e) {
+                // Show error message in result div
+                setResult(`Invalid JSON, cannot format: ${e.message}`, 'error');
+            }
+        });
+
+        // --- Copy Button Logic ---
+         copyBtn?.addEventListener('click', () => {
+            if (!jsonOutput || !jsonOutput.value) return;
+            navigator.clipboard.writeText(jsonOutput.value).then(() => {
+                copyBtn.textContent = 'Copied!';
+                copyBtn.classList.remove('bg-gray-500', 'hover:bg-gray-600');
+                copyBtn.classList.add('bg-green-600'); // Indicate success
+                setTimeout(() => {
+                    copyBtn.textContent = 'Copy Output';
+                    copyBtn.classList.remove('bg-green-600');
+                    copyBtn.classList.add('bg-gray-500', 'hover:bg-gray-600');
+                 }, 1500);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                alert('Failed to copy formatted JSON.');
+            });
+        });
+
+        // Clear results/output if input is cleared manually
+        jsonInput?.addEventListener('input', () => {
+            if (jsonInput.value.trim() === '') {
+                setResult(''); // Clear status message
+                clearOutput();
+            }
+        });
+
+    </script>
+</body>
+</html>

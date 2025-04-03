@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown Previewer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Marked.js library for Markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Optional: DOMPurify for extra sanitization (recommended) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.4.1/purify.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { 'sans': ['Lato', 'sans-serif'], }, colors: { 'accent': { 'DEFAULT': '#007ACC', 'dark': '#005f9e' }, 'light-bg': '#f8f9fa', 'dark-text': '#212529', 'secondary-text': '#6c757d', } } } }
+    </script>
+    <style>
+        /* Basic styles for rendered Markdown */
+        .markdown-body { line-height: 1.6; }
+        .markdown-body h1, .markdown-body h2, .markdown-body h3 { border-bottom: 1px solid #eee; padding-bottom: 0.3em; margin-top: 24px; margin-bottom: 16px; font-weight: 600; }
+        .markdown-body h1 { font-size: 2em; } .markdown-body h2 { font-size: 1.5em; } .markdown-body h3 { font-size: 1.25em; }
+        .markdown-body p { margin-bottom: 16px; }
+        .markdown-body ul, .markdown-body ol { padding-left: 2em; margin-bottom: 16px; }
+        .markdown-body li { margin-bottom: 0.25em; }
+        .markdown-body code { font-family: monospace; background-color: rgba(0,0,0,0.04); padding: .2em .4em; font-size: 85%; border-radius: 3px; }
+        .markdown-body pre { background-color: #f6f8fa; padding: 16px; overflow: auto; border-radius: 3px; margin-bottom: 16px; }
+        .markdown-body pre code { background-color: transparent; padding: 0; font-size: 100%; }
+        .markdown-body blockquote { border-left: .25em solid #dfe2e5; padding: 0 1em; color: #6a737d; margin-left: 0; margin-right: 0; margin-bottom: 16px; }
+        .markdown-body table { border-collapse: collapse; width: auto; margin-bottom: 16px; }
+        .markdown-body th, .markdown-body td { border: 1px solid #dfe2e5; padding: 6px 13px; }
+        .markdown-body th { font-weight: 600; }
+        .markdown-body img { max-width: 100%; }
+    </style>
+</head>
+<body class="bg-light-bg font-sans text-dark-text antialiased">
+    <header class="bg-white shadow-sm">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-accent">Markdown Previewer</h1>
+            <a href="index.html" class="text-sm text-accent hover:underline">&larr; Back to Dashboard</a>
+        </div>
+    </header>
+    <main class="container mx-auto px-6 py-12">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Input -->
+            <div>
+                <label for="markdown-input" class="block text-lg font-medium text-secondary-text mb-2">Markdown Input:</label>
+                <textarea id="markdown-input" rows="25" class="w-full h-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-accent focus:border-accent text-sm font-mono" placeholder="Type **Markdown** here..."></textarea>
+            </div>
+            <!-- Preview -->
+            <div>
+                 <label for="markdown-preview" class="block text-lg font-medium text-secondary-text mb-2">HTML Preview:</label>
+                 <div id="markdown-preview" class="markdown-body p-4 border border-gray-300 rounded-md bg-white min-h-[400px] h-full overflow-y-auto"></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        const markdownInput = document.getElementById('markdown-input');
+        const previewOutput = document.getElementById('markdown-preview');
+
+        // Configure marked (optional: enable GitHub Flavored Markdown, breaks, etc.)
+        marked.setOptions({
+          breaks: true, // Convert single line breaks to <br>
+          gfm: true,    // Enable GitHub Flavored Markdown
+          // Use DOMPurify if available for better sanitization
+          sanitizer: (typeof DOMPurify !== 'undefined') ? DOMPurify.sanitize : undefined,
+          // Or use the basic built-in sanitizer (less robust)
+          // sanitize: true,
+        });
+
+
+        function updatePreview() {
+            if (!previewOutput) return;
+            const markdownText = markdownInput.value;
+            try {
+                // Parse Markdown to HTML using marked
+                const html = marked.parse(markdownText);
+                // Set the innerHTML of the preview div
+                previewOutput.innerHTML = html;
+            } catch (e) {
+                previewOutput.innerHTML = '<p class="text-red-600">Error parsing Markdown.</p>';
+                console.error("Markdown parsing error:", e);
+            }
+        }
+
+        markdownInput?.addEventListener('input', updatePreview);
+
+        // Initial preview update
+        updatePreview();
+    </script>
+</body>
+</html>

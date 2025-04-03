@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regex Tester</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { 'sans': ['Lato', 'sans-serif'], }, colors: { 'accent': { 'DEFAULT': '#007ACC', 'dark': '#005f9e' }, 'light-bg': '#f8f9fa', 'dark-text': '#212529', 'secondary-text': '#6c757d', } } } }
+    </script>
+    <style> code { background-color: rgba(0,0,0,0.05); padding: 0.1em 0.3em; border-radius: 3px; font-family: monospace;} </style>
+</head>
+<body class="bg-light-bg font-sans text-dark-text antialiased">
+    <header class="bg-white shadow-sm">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-accent">Regular Expression Tester</h1>
+            <a href="index.html" class="text-sm text-accent hover:underline">&larr; Back to Dashboard</a>
+        </div>
+    </header>
+    <main class="container mx-auto px-6 py-12">
+        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200 max-w-4xl mx-auto">
+            <!-- Regex Input -->
+            <div class="mb-4">
+                <label for="regex-input" class="block text-sm font-medium text-secondary-text mb-1">Regular Expression:</label>
+                <div class="flex items-center gap-2">
+                    <span class="text-gray-500">/</span>
+                    <input type="text" id="regex-input" placeholder="pattern" class="flex-grow px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-accent focus:border-accent text-sm font-mono">
+                    <span class="text-gray-500">/</span>
+                    <input type="text" id="regex-flags" placeholder="flags (gim)" class="w-16 px-2 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-accent focus:border-accent text-sm font-mono">
+                </div>
+                <div id="regex-error" class="mt-1 text-red-600 text-xs"></div>
+            </div>
+
+            <!-- Test String Input -->
+            <div class="mb-4">
+                <label for="test-string-input" class="block text-sm font-medium text-secondary-text mb-1">Test String:</label>
+                <textarea id="test-string-input" rows="8" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-accent focus:border-accent text-sm font-mono"></textarea>
+            </div>
+
+            <button id="test-regex-btn" class="bg-accent text-white px-4 py-2 rounded-md hover:bg-accent-dark transition duration-300 text-sm mb-4">Test Regex</button>
+
+             <!-- Results -->
+            <div>
+                <h3 class="text-lg font-medium mb-2 text-accent">Matches Found:</h3>
+                <div id="match-count" class="text-sm text-secondary-text mb-2">Found 0 matches.</div>
+                <ul id="match-results" class="list-disc list-inside text-sm space-y-1 bg-gray-50 p-3 border border-gray-200 rounded min-h-[100px]">
+                    <!-- Match results will be listed here -->
+                </ul>
+            </div>
+        </div>
+    </main>
+    <script>
+        const regexInput = document.getElementById('regex-input');
+        const flagsInput = document.getElementById('regex-flags');
+        const testStringInput = document.getElementById('test-string-input');
+        const testBtn = document.getElementById('test-regex-btn');
+        const resultsList = document.getElementById('match-results');
+        const countEl = document.getElementById('match-count');
+        const regexErrorEl = document.getElementById('regex-error');
+
+        function testRegex() {
+            if (!resultsList || !countEl || !regexErrorEl) return;
+            resultsList.innerHTML = ''; // Clear previous results
+            countEl.textContent = 'Found 0 matches.';
+            regexErrorEl.textContent = '';
+
+            const pattern = regexInput.value;
+            const flags = flagsInput.value || '';
+            const testString = testStringInput.value;
+
+            if (!pattern) {
+                regexErrorEl.textContent = 'Please enter a regular expression pattern.';
+                return;
+            }
+
+            try {
+                const regex = new RegExp(pattern, flags);
+                let matches = [];
+                let match;
+
+                // Use matchAll if available and global flag is set for capturing groups easily
+                if ('matchAll' in String.prototype && flags.includes('g')) {
+                     matches = Array.from(testString.matchAll(regex));
+                } else if (flags.includes('g')) { // Fallback for global flag without matchAll
+                     while ((match = regex.exec(testString)) !== null) {
+                         matches.push(match);
+                         // Prevent infinite loops with zero-width matches
+                         if (match.index === regex.lastIndex) { regex.lastIndex++; }
+                     }
+                } else { // Non-global match
+                    match = testString.match(regex);
+                    if (match) { matches.push(match); }
+                }
+
+                countEl.textContent = `Found ${matches.length} match(es).`;
+
+                if (matches.length === 0) {
+                    const li = document.createElement('li');
+                    li.textContent = '(No matches)';
+                    li.classList.add('italic', 'text-secondary-text');
+                    resultsList.appendChild(li);
+                } else {
+                    matches.forEach((m, index) => {
+                        const li = document.createElement('li');
+                        const matchText = m[0]; // Full match is always group 0
+                        const groups = m.length > 1 ? ` (Groups: ${m.slice(1).map(g => g === undefined ? 'undefined' : `"${g}"`).join(', ')})` : '';
+                        const indexInfo = m.index !== undefined ? ` at index ${m.index}` : ''; // matchAll provides index
+
+                        li.innerHTML = `Match ${index + 1}: <code>${matchText.replace(/</g, '&lt;')}</code>${indexInfo}${groups}`;
+                        resultsList.appendChild(li);
+                    });
+                }
+
+            } catch (e) {
+                regexErrorEl.textContent = `Invalid Regex: ${e.message}`;
+                console.error("Regex Error:", e);
+            }
+        }
+
+        testBtn?.addEventListener('click', testRegex);
+        // Optional: Test automatically on input change (can be intensive)
+        // regexInput?.addEventListener('input', testRegex);
+        // flagsInput?.addEventListener('input', testRegex);
+        // testStringInput?.addEventListener('input', testRegex);
+    </script>
+</body>
+</html>

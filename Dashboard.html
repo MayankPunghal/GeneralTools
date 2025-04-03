@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Developer Utilities Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { 'sans': ['Lato', 'sans-serif'], },
+                    colors: {
+                        'accent': { 'DEFAULT': '#007ACC', 'dark': '#005f9e' },
+                        'light-bg': '#f8f9fa',
+                        'dark-text': '#212529',
+                        'secondary-text': '#6c757d',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Optional: smoother transitions for show/hide */
+        /* .tool-card { transition: opacity 0.3s ease-out, transform 0.3s ease-out; } */
+        /* .tool-card.hidden { opacity: 0; transform: scale(0.95); pointer-events: none; } */
+    </style>
+</head>
+<body class="bg-light-bg font-sans text-dark-text antialiased">
+
+    <header class="bg-white shadow-sm">
+        <div class="container mx-auto px-6 py-4">
+            <h1 class="text-3xl font-bold text-accent">Developer Utilities Dashboard</h1>
+            <p class="text-secondary-text text-sm mt-1">A collection of helpful tools for developers.</p>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+
+        <!-- Search Bar -->
+        <div class="mb-8 max-w-xl mx-auto">
+            <label for="tool-search" class="sr-only">Search Tools</label>
+            <input type="search" id="tool-search" placeholder="Search tools by name or description..."
+                   class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
+        </div>
+
+        <h2 class="text-2xl font-semibold mb-6 text-center text-dark-text">Available Tools</h2>
+
+        <!-- Grid Container -->
+        <div id="tools-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+
+            <!-- === EXISTING TOOL CARDS === -->
+
+            <!-- Base64 Converter Card -->
+            <a href="base64_converter.html"
+               class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
+               data-tool-id="base64"
+               data-tool-name="Base64 Converter"
+               data-tool-desc="Encode text to Base64 or decode Base64 strings back to text.">
+                <h3 class="text-xl font-semibold mb-2 text-accent pointer-events-none">Base64 Converter</h3>
+                <p class="text-secondary-text text-sm pointer-events-none">Encode text to Base64 or decode Base64 strings back to text.</p>
+            </a>
+
+            <!-- URL Encoder/Decoder Card -->
+            <a href="url_encoder.html"
+               class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
+               data-tool-id="urlEncoder"
+               data-tool-name="URL Encoder / Decoder"
+               data-tool-desc="Encode/decode strings for safe use within URLs.">
+                <h3 class="text-xl font-semibold mb-2 text-accent pointer-events-none">URL Encoder / Decoder</h3>
+                <p class="text-secondary-text text-sm pointer-events-none">Encode/decode strings for safe use within URLs.</p>
+            </a>
+
+            <!-- JWT Decoder Card -->
+            <a href="jwt_decoder.html"
+               class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
+                data-tool-id="jwtDecoder"
+                data-tool-name="JWT Decoder"
+                data-tool-desc="Decode the header and payload of a JSON Web Token (No signature verification).">
+                <h3 class="text-xl font-semibold mb-2 text-accent pointer-events-none">JWT Decoder</h3>
+                <p class="text-secondary-text text-sm pointer-events-none">Decode the header and payload of a JSON Web Token (No signature verification).</p>
+            </a>
+
+            <!-- UNIX Timestamp Converter Card -->
+            <a href="timestamp_converter.html"
+               class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
+                data-tool-id="timestampConverter"
+                data-tool-name="UNIX Timestamp Converter"
+                data-tool-desc="Convert between Unix timestamps and human-readable dates (local/UTC).">
+                <h3 class="text-xl font-semibold mb-2 text-accent pointer-events-none">UNIX Timestamp Converter</h3>
+                <p class="text-secondary-text text-sm pointer-events-none">Convert between Unix timestamps and human-readable dates (local/UTC).</p>
+            </a>
+
+            <!-- Color Visualizer Card -->
+            <a href="color_visualizer.html"
+               class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
+                data-tool-id="colorVisualizer"
+                data-tool-name="Color Visualizer"
+                data-tool-desc="Convert between HEX, RGB, and HSL color formats with a preview.">
+                <h3 class="text-xl font-semibold mb-2 text-accent pointer-events-none">Color Visualizer</h3>
+                <p class="text-secondary-text text-sm pointer-events-none">Convert between HEX, RGB, and HSL color formats with a preview.</p>
+            </a>
+
+            <!-- Markdown Previewer Card -->
+            <a href="markdown_previewer.html"
+               class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
+               data-tool-id="markdownPreviewer"
+               data-tool-name="Markdown Previewer"
+               data-tool-desc="See a live HTML preview of your Markdown text as you type.">
+                <h3 class="text-xl font-semibold mb-2 text-accent pointer-events-none">Markdown Previewer</h3>
+                <p class="text-secondary-text text-sm pointer-events-none">See a live HTML preview of your Markdown text as you type.</p>
+            </a>
+
+            <!-- UUID Generator Card -->
+            <a href="uuid_generator.html"
+               class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
+                data-tool-id="uuidGenerator"
+                data-tool-name="UUID Generator"
+                data-tool-desc="Generate cryptographically strong Version 4 UUIDs.">
+                <h3 class="text-xl font-semibold mb-2 text-accent pointer-events-none">UUID Generator</h3>
+                <p class="text-secondary-text text-sm pointer-events-none">Generate cryptographically strong Version 4 UUIDs.</p>
+            </a>
+
+            <!-- Char-Word Counter Card -->
+            <a href="char_word_counter.html"
+               class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
+                data-tool-id="charWordCounter"
+                data-tool-name="Char-Word Counter"
+                data-tool-desc="Count characters, words, and lines in a block of text.">
+                <h3 class="text-xl font-semibold mb-2 text-accent pointer-events-none">Char-Word Counter</h3>
+                <p class="text-secondary-text text-sm pointer-events-none">Count characters, words, and lines in a block of text.</p>
+            </a>
+
+            <!-- REGEX Tester Card -->
+            <a href="regex_tester.html"
+               class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
+                data-tool-id="regexTester"
+                data-tool-name="REGEX Tester"
+                data-tool-desc="Test regular expressions against strings and view the matches found.">
+                <h3 class="text-xl font-semibold mb-2 text-accent pointer-events-none">REGEX Tester</h3>
+                <p class="text-secondary-text text-sm pointer-events-none">Test regular expressions against strings and view the matches found.</p>
+            </a>
+
+            <!-- JSON Validator/Formatter Card -->
+            <a href="JSONValidatorFormatter.html"
+               class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
+               data-tool-id="jsonValidatorFormatter"
+               data-tool-name="JSON Validator & Formatter"
+               data-tool-desc="Validate JSON structure and format it with selectable indentation.">
+                <h3 class="text-xl font-semibold mb-2 text-accent pointer-events-none">JSON Validator & Formatter</h3>
+                <p class="text-secondary-text text-sm pointer-events-none">Validate JSON structure and format it with selectable indentation.</p>
+            </a>
+
+             <!-- === NEW TOOL CARDS === -->
+
+             <!-- CSV Converter Card -->
+            <a href="csv_json_table.html"
+               class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
+               data-tool-id="csvConverter"
+               data-tool-name="CSV Converter & Viewer"
+               data-tool-desc="Convert CSV data to JSON format or view it as an HTML table.">
+                <h3 class="text-xl font-semibold mb-2 text-accent pointer-events-none">CSV Converter & Viewer</h3>
+                <p class="text-secondary-text text-sm pointer-events-none">Convert CSV data to JSON format or view it as an HTML table.</p>
+            </a>
+
+            <!-- Binary Converter Card -->
+            <a href="binary_converter.html"
+               class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
+               data-tool-id="binaryConverter"
+               data-tool-name="Binary Text Converter"
+               data-tool-desc="Convert text to its binary representation (byte-by-byte) and back.">
+                <h3 class="text-xl font-semibold mb-2 text-accent pointer-events-none">Binary Text Converter</h3>
+                <p class="text-secondary-text text-sm pointer-events-none">Convert text to its binary representation (byte-by-byte) and back.</p>
+            </a>
+
+            <!-- Hash Generator Card -->
+            <a href="hash_generator.html"
+               class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
+               data-tool-id="hashGenerator"
+               data-tool-name="Hash Generator"
+               data-tool-desc="Generate MD5*, SHA-1*, SHA-256, and SHA-512 hashes for text input. (*Requires library for MD5)">
+                <h3 class="text-xl font-semibold mb-2 text-accent pointer-events-none">Hash Generator</h3>
+                <p class="text-secondary-text text-sm pointer-events-none">Generate MD5*, SHA-1*, SHA-256, and SHA-512 hashes for text input. (*Requires library for MD5)</p>
+            </a>
+
+            <!-- Calculator Card -->
+            <a href="calculator.html"
+               class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
+               data-tool-id="calculator"
+               data-tool-name="Scientific Calculator"
+               data-tool-desc="Perform basic arithmetic and scientific calculations. (Note: basic implementation)">
+                <h3 class="text-xl font-semibold mb-2 text-accent pointer-events-none">Scientific Calculator</h3>
+                <p class="text-secondary-text text-sm pointer-events-none">Perform basic arithmetic and scientific calculations. (Note: basic implementation)</p>
+            </a>
+
+            <!-- Data Visualizer Card -->
+            <a href="data_visualizer.html"
+               class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
+               data-tool-id="dataVisualizer"
+               data-tool-name="Data Visualizer (Charts)"
+               data-tool-desc="Create various charts (bar, line, pie, etc.) from simple CSV data using Chart.js.">
+                <h3 class="text-xl font-semibold mb-2 text-accent pointer-events-none">Data Visualizer (Charts)</h3>
+                <p class="text-secondary-text text-sm pointer-events-none">Create various charts (bar, line, pie, etc.) from simple CSV data using Chart.js.</p>
+            </a>
+
+            <!-- End of New Cards -->
+
+        </div>
+        <div id="no-results" class="text-center text-secondary-text mt-8 hidden">No tools found matching your search.</div>
+    </main>
+
+    <footer class="bg-dark-text text-light-bg py-6 mt-16">
+        <div class="container mx-auto px-6 text-center text-sm">
+            &copy; 2025 Mayank Punghal            
+	</div>
+    </footer>
+
+    <script>
+        const searchInput = document.getElementById('tool-search');
+        const toolsGrid = document.getElementById('tools-grid');
+        // Re-select tool cards *after* potentially adding new ones dynamically or on load
+        let toolCards = []; // Initialize as empty
+        const noResultsDiv = document.getElementById('no-results');
+        const clearUsageBtn = document.getElementById('clear-usage-btn');
+        const USAGE_STORAGE_KEY = 'developerToolUsageCounts';
+
+        // --- Usage Tracking ---
+        function getUsageCounts() {
+            try {
+                const storedCounts = localStorage.getItem(USAGE_STORAGE_KEY);
+                return storedCounts ? JSON.parse(storedCounts) : {};
+            } catch (e) {
+                console.error("Error reading usage counts from localStorage:", e);
+                return {};
+            }
+        }
+
+        function incrementUsageCount(toolId) {
+            if (!toolId) return;
+            const counts = getUsageCounts();
+            counts[toolId] = (counts[toolId] || 0) + 1;
+            try {
+                localStorage.setItem(USAGE_STORAGE_KEY, JSON.stringify(counts));
+            } catch (e) {
+                console.error("Error saving usage counts to localStorage:", e);
+            }
+        }
+
+        function attachUsageListeners() {
+             // Attach click listener to cards for usage tracking
+            toolCards.forEach(card => {
+                 // Remove existing listener first to prevent duplicates if called multiple times
+                card.removeEventListener('click', handleCardClick);
+                card.addEventListener('click', handleCardClick);
+            });
+        }
+
+        function handleCardClick(event) {
+            // Check if the target is the card itself (the <a> tag)
+            if (event.currentTarget.classList.contains('tool-card')) {
+                incrementUsageCount(event.currentTarget.dataset.toolId);
+            }
+             // Note: Navigation happens naturally after this listener completes
+        }
+
+
+         // --- Sorting ---
+        function sortAndRenderTools() {
+            if (!toolsGrid) return;
+             // Select cards *inside* this function to get the current state
+             toolCards = Array.from(toolsGrid.getElementsByClassName('tool-card'));
+             if(toolCards.length === 0) return;
+
+
+            const usageCounts = getUsageCounts();
+
+            toolCards.sort((a, b) => {
+                const countA = usageCounts[a.dataset.toolId] || 0;
+                const countB = usageCounts[b.dataset.toolId] || 0;
+                if (countB !== countA) {
+                    return countB - countA; // Sort by count descending
+                }
+                const nameA = a.dataset.toolName || '';
+                const nameB = b.dataset.toolName || '';
+                return nameA.localeCompare(nameB); // Then alphabetically ascending
+            });
+
+            // Re-append sorted cards to the grid
+            toolCards.forEach(card => toolsGrid.appendChild(card));
+
+            // Re-attach listeners after DOM manipulation
+            attachUsageListeners();
+        }
+
+        // --- Search Filtering ---
+        function handleSearch() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            let visibleCount = 0;
+
+            toolCards.forEach(card => {
+                const name = card.dataset.toolName?.toLowerCase() || '';
+                const desc = card.dataset.toolDesc?.toLowerCase() || '';
+                const isVisible = name.includes(searchTerm) || desc.includes(searchTerm);
+
+                if (isVisible) {
+                    card.classList.remove('hidden');
+                    visibleCount++;
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+
+            if (noResultsDiv) {
+                noResultsDiv.classList.toggle('hidden', visibleCount > 0);
+            }
+        }
+
+        searchInput?.addEventListener('input', handleSearch);
+
+        // --- Clear Usage Button ---
+        clearUsageBtn?.addEventListener('click', () => {
+            if (confirm('Are you sure you want to clear all tool usage counts? This cannot be undone.')) {
+                localStorage.removeItem(USAGE_STORAGE_KEY);
+                alert('Usage counts cleared. Reload the page to see the default order.');
+            }
+        });
+
+        // --- Initial Load ---
+        document.addEventListener('DOMContentLoaded', () => {
+            sortAndRenderTools(); // This now selects cards and attaches listeners
+            handleSearch();
+        });
+
+    </script>
+
+</body>
+</html>

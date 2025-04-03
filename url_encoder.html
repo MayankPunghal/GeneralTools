@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Encoder/Decoder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { 'sans': ['Lato', 'sans-serif'], }, colors: { 'accent': { 'DEFAULT': '#007ACC', 'dark': '#005f9e' }, 'light-bg': '#f8f9fa', 'dark-text': '#212529', 'secondary-text': '#6c757d', } } } }
+    </script>
+</head>
+<body class="bg-light-bg font-sans text-dark-text antialiased">
+    <header class="bg-white shadow-sm">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-accent">URL Encoder / Decoder</h1>
+            <a href="index.html" class="text-sm text-accent hover:underline">&larr; Back to Dashboard</a>
+        </div>
+    </header>
+    <main class="container mx-auto px-6 py-12">
+        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200 max-w-3xl mx-auto">
+            <!-- Encoder -->
+            <div class="mb-6 pb-6 border-b border-gray-200">
+                <h3 class="text-lg font-medium mb-2 text-accent">Encode String for URL</h3>
+                <div class="mb-3">
+                    <label for="url-text-input" class="block text-sm font-medium text-secondary-text mb-1">String to Encode (Updates automatically):</label>
+                    <textarea id="url-text-input" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-accent focus:border-accent text-sm"></textarea>
+                </div>
+                <div class="mt-3">
+                    <label for="url-output" class="block text-sm font-medium text-secondary-text mb-1">Encoded Output:</label>
+                    <textarea id="url-output" rows="4" readonly class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm font-mono"></textarea>
+                </div>
+            </div>
+            <!-- Decoder -->
+            <div>
+                <h3 class="text-lg font-medium mb-2 text-accent">Decode URL Component</h3>
+                <div class="mb-3">
+                    <label for="url-input" class="block text-sm font-medium text-secondary-text mb-1">URL Encoded String to Decode (Updates automatically):</label>
+                    <textarea id="url-input" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-accent focus:border-accent text-sm font-mono"></textarea>
+                </div>
+                 <div id="decode-error" class="mt-2 text-red-600 text-sm min-h-[1.25rem]"></div>
+                <div class="mt-3">
+                    <label for="url-decoded-output" class="block text-sm font-medium text-secondary-text mb-1">Decoded String Output:</label>
+                    <textarea id="url-decoded-output" rows="4" readonly class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm"></textarea>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script>
+        const textInput = document.getElementById('url-text-input');
+        const encodedOutput = document.getElementById('url-output');
+        const urlInput = document.getElementById('url-input');
+        const decodedOutput = document.getElementById('url-decoded-output');
+        const decodeError = document.getElementById('decode-error');
+
+        function performEncode() {
+            try { encodedOutput.value = encodeURIComponent(textInput.value); }
+            catch (e) { encodedOutput.value = textInput.value ? 'Error encoding.' : ''; console.error(e); }
+        }
+        function performDecode() {
+            decodedOutput.value = '';
+            if(decodeError) decodeError.textContent = '';
+            const inputString = urlInput.value.trim();
+            if (!inputString) return;
+            try { decodedOutput.value = decodeURIComponent(inputString); }
+            catch (e) { if(decodeError) decodeError.textContent = 'Error: Invalid URI component string.'; console.error(e); }
+        }
+        textInput?.addEventListener('input', performEncode);
+        urlInput?.addEventListener('input', performDecode);
+    </script>
+</body>
+</html>

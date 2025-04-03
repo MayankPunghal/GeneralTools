@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UUID/GUID Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { 'sans': ['Lato', 'sans-serif'], }, colors: { 'accent': { 'DEFAULT': '#007ACC', 'dark': '#005f9e' }, 'light-bg': '#f8f9fa', 'dark-text': '#212529', 'secondary-text': '#6c757d', } } } }
+    </script>
+</head>
+<body class="bg-light-bg font-sans text-dark-text antialiased">
+    <header class="bg-white shadow-sm">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-accent">UUID (v4) Generator</h1>
+            <a href="index.html" class="text-sm text-accent hover:underline">&larr; Back to Dashboard</a>
+        </div>
+    </header>
+    <main class="container mx-auto px-6 py-12">
+        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200 max-w-lg mx-auto text-center">
+            <button id="generate-uuid-btn" class="bg-accent text-white px-6 py-3 rounded-md hover:bg-accent-dark transition duration-300 text-lg mb-6">Generate UUID (v4)</button>
+            <div>
+                <label for="uuid-output" class="block text-sm font-medium text-secondary-text mb-1">Generated UUID:</label>
+                <input type="text" id="uuid-output" readonly class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-center font-mono text-sm">
+                <button id="copy-uuid-btn" class="mt-2 bg-gray-500 text-white px-3 py-1 rounded-md hover:bg-gray-600 transition duration-300 text-xs opacity-0 transition-opacity" title="Copy to clipboard">Copy</button>
+            </div>
+        </div>
+    </main>
+    <script>
+        const generateBtn = document.getElementById('generate-uuid-btn');
+        const outputInput = document.getElementById('uuid-output');
+        const copyBtn = document.getElementById('copy-uuid-btn');
+
+        function generateUUID() {
+            if ('crypto' in window && 'randomUUID' in window.crypto) {
+                return crypto.randomUUID();
+            } else {
+                // Basic fallback for older browsers (not cryptographically secure like crypto.randomUUID)
+                console.warn("crypto.randomUUID not supported, using fallback.");
+                return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                    return v.toString(16);
+                });
+            }
+        }
+
+        generateBtn?.addEventListener('click', () => {
+            const newUuid = generateUUID();
+            outputInput.value = newUuid;
+            copyBtn.style.opacity = '1'; // Show copy button
+            copyBtn.textContent = 'Copy'; // Reset button text
+        });
+
+        copyBtn?.addEventListener('click', () => {
+            if (!outputInput.value) return;
+            navigator.clipboard.writeText(outputInput.value).then(() => {
+                copyBtn.textContent = 'Copied!';
+                setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1500); // Reset after 1.5s
+            }).catch(err => {
+                console.error('Failed to copy UUID: ', err);
+                alert('Failed to copy UUID.'); // Provide feedback
+            });
+        });
+    </script>
+</body>
+</html>

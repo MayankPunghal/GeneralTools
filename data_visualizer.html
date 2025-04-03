@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Chart Visualizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { 'sans': ['Lato', 'sans-serif'], }, colors: { 'accent': { 'DEFAULT': '#007ACC', 'dark': '#005f9e' }, 'light-bg': '#f8f9fa', 'dark-text': '#212529', 'secondary-text': '#6c757d', } } } }
+    </script>
+</head>
+<body class="bg-light-bg font-sans text-dark-text antialiased">
+    <header class="bg-white shadow-sm">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-accent">Data Visualizer (Chart.js)</h1>
+            <a href="index.html" class="text-sm text-accent hover:underline">&larr; Back to Dashboard</a>
+        </div>
+    </header>
+    <main class="container mx-auto px-6 py-12">
+        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Data Input & Controls -->
+                <div class="lg:col-span-1">
+                    <h3 class="text-lg font-medium mb-2 text-accent">Data & Options</h3>
+                     <div class="mb-4">
+                        <label for="chart-data" class="block text-sm font-medium text-secondary-text mb-1">Data (CSV: label,value):</label>
+                        <textarea id="chart-data" rows="10" placeholder="Category A,10&#10;Category B,25&#10;Category C,15&#10;Category D,30" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-accent focus:border-accent text-sm font-mono">Apples,12&#10;Oranges,19&#10;Bananas,3&#10;Grapes,5&#10;Pears,2</textarea>
+                        <p class="text-xs text-secondary-text mt-1">Enter data as Comma Separated Values (Label,Value per line).</p>
+                    </div>
+                    <div class="mb-4">
+                        <label for="chart-type" class="block text-sm font-medium text-secondary-text mb-1">Chart Type:</label>
+                        <select id="chart-type" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-accent focus:border-accent text-sm bg-white">
+                            <option value="bar" selected>Bar Chart</option>
+                            <option value="line">Line Chart</option>
+                            <option value="pie">Pie Chart</option>
+                            <option value="doughnut">Doughnut Chart</option>
+                            <option value="polarArea">Polar Area</option>
+                            <option value="radar">Radar Chart</option>
+                        </select>
+                    </div>
+                     <div class="mb-4">
+                        <label for="chart-title" class="block text-sm font-medium text-secondary-text mb-1">Chart Title:</label>
+                        <input type="text" id="chart-title" value="My Data Chart" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-accent focus:border-accent text-sm">
+                    </div>
+                    <button id="update-chart-btn" class="bg-accent text-white px-4 py-2 rounded-md hover:bg-accent-dark transition duration-300 text-sm w-full">Update Chart</button>
+                     <div id="chart-error" class="mt-2 text-red-600 text-sm font-semibold"></div>
+                </div>
+
+                <!-- Chart Display -->
+                <div class="lg:col-span-2">
+                     <h3 class="text-lg font-medium mb-2 text-accent">Chart Preview</h3>
+                     <div class="relative min-h-[400px] border border-gray-200 rounded p-2 bg-gray-50">
+                        <canvas id="myChartCanvas"></canvas>
+                     </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script>
+        const dataInput = document.getElementById('chart-data');
+        const typeSelect = document.getElementById('chart-type');
+        const titleInput = document.getElementById('chart-title');
+        const updateBtn = document.getElementById('update-chart-btn');
+        const canvas = document.getElementById('myChartCanvas');
+        const errorDiv = document.getElementById('chart-error');
+        let currentChart = null; // To hold the chart instance
+
+        function clearError() { if(errorDiv) errorDiv.textContent = ''; }
+        function showError(message) { if(errorDiv) errorDiv.textContent = message; }
+
+        function parseChartData(csvString) {
+            const lines = csvString.trim().split(/\r?\n/);
+            const labels = [];
+            const dataValues = [];
+            let parseError = null;
+
+            lines.forEach((line, index) => {
+                if (!line.trim()) return; // Skip empty lines
+                const parts = line.split(',');
+                if (parts.length < 2) {
+                    parseError = `Error on line ${index + 1}: Not enough columns (Expected Label,Value).`;
+                    return; // Stop processing this line
+                }
+                const label = parts[0].trim();
+                const value = parseFloat(parts[1].trim());
+
+                if (isNaN(value)) {
+                     parseError = `Error on line ${index + 1}: Value "${parts[1].trim()}" is not a valid number.`;
+                     return; // Stop processing this line
+                }
+                labels.push(label);
+                dataValues.push(value);
+            });
+
+            if (parseError) {
+                showError(parseError);
+                return null; // Indicate failure
+            }
+             if (labels.length === 0) {
+                 showError("No valid data found to plot.");
+                 return null;
+            }
+
+            return { labels, dataValues };
+        }
+
+
+        function renderChart() {
+            clearError();
+            const chartType = typeSelect.value;
+            const chartTitle = titleInput.value || 'Chart';
+            const parsedData = parseChartData(dataInput.value);
+
+            if (!parsedData) return; // Stop if parsing failed
+
+            const { labels, dataValues } = parsedData;
+
+            // Destroy previous chart instance if it exists
+            if (currentChart) {
+                currentChart.destroy();
+            }
+
+            if (!canvas) {
+                showError("Canvas element not found!"); return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                 showError("Could not get canvas context!"); return;
+            }
+
+            try {
+                 currentChart = new Chart(ctx, {
+                    type: chartType,
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: chartTitle, // Use title as dataset label for simple charts
+                            data: dataValues,
+                            borderWidth: 1,
+                            // Chart.js will often pick reasonable default colors
+                            // backgroundColor: 'rgba(0, 122, 204, 0.5)', // Example color
+                            // borderColor: 'rgba(0, 122, 204, 1)',
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false, // Allow chart to fill container height
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: chartTitle,
+                                font: { size: 16 }
+                            },
+                            legend: {
+                                // Position legend based on chart type (e.g., top for bar/line, right for pie)
+                                position: ['pie', 'doughnut', 'polarArea'].includes(chartType) ? 'right' : 'top',
+                            }
+                        },
+                        scales: ['bar', 'line'].includes(chartType) ? { // Only show scales for relevant chart types
+                            y: { beginAtZero: true }
+                        } : {}
+                    }
+                });
+            } catch(e) {
+                 showError(`Chart.js Error: ${e.message}`);
+                 console.error("Chart rendering error:", e);
+            }
+        }
+
+        updateBtn?.addEventListener('click', renderChart);
+
+        // Initial chart render on page load
+        document.addEventListener('DOMContentLoaded', renderChart);
+
+    </script>
+</body>
+</html>

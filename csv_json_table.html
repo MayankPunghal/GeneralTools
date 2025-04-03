@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Converter & Viewer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { 'sans': ['Lato', 'sans-serif'], }, colors: { 'accent': { 'DEFAULT': '#007ACC', 'dark': '#005f9e' }, 'light-bg': '#f8f9fa', 'dark-text': '#212529', 'secondary-text': '#6c757d', } } } }
+    </script>
+    <style>
+        #csv-table-output table { border-collapse: collapse; width: 100%; font-size: 0.875rem; margin-top: 0.5rem;}
+        #csv-table-output th, #csv-table-output td { border: 1px solid #e2e8f0; padding: 0.5rem; text-align: left; }
+        #csv-table-output th { background-color: #f1f5f9; font-weight: 600;}
+        #csv-table-output tr:nth-child(even) { background-color: #f8fafc; }
+    </style>
+</head>
+<body class="bg-light-bg font-sans text-dark-text antialiased">
+    <header class="bg-white shadow-sm">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-accent">CSV to JSON / Table Viewer</h1>
+            <a href="index.html" class="text-sm text-accent hover:underline">&larr; Back to Dashboard</a>
+        </div>
+    </header>
+    <main class="container mx-auto px-6 py-12">
+        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200 max-w-5xl mx-auto">
+            <!-- Input -->
+            <div class="mb-4">
+                <label for="csv-input" class="block text-sm font-medium text-secondary-text mb-1">Paste CSV Data:</label>
+                <textarea id="csv-input" rows="10" placeholder="header1,header2,header3&#10;value1a,value1b,value1c&#10;value2a,value2b,value2c" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-accent focus:border-accent text-sm font-mono"></textarea>
+                <div class="flex items-center gap-4 mt-2 text-sm">
+                    <label for="csv-delimiter" class="text-secondary-text">Delimiter:</label>
+                    <input type="text" id="csv-delimiter" value="," class="w-12 px-2 py-1 border border-gray-300 rounded-md text-center">
+                    <div class="flex items-center gap-1">
+                        <input type="checkbox" id="csv-header" checked class="h-4 w-4 text-accent focus:ring-accent border-gray-300 rounded">
+                        <label for="csv-header" class="text-secondary-text">First row is header</label>
+                    </div>
+                </div>
+            </div>
+            <button id="convert-csv-btn" class="bg-accent text-white px-4 py-2 rounded-md hover:bg-accent-dark transition duration-300 text-sm mb-4">Convert</button>
+            <div id="csv-error" class="mb-4 text-red-600 text-sm font-semibold"></div>
+
+            <!-- Outputs -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="text-lg font-medium mb-2 text-accent">JSON Output</h3>
+                    <textarea id="json-output-csv" rows="15" readonly class="w-full h-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm font-mono"></textarea>
+                </div>
+                <div>
+                    <h3 class="text-lg font-medium mb-2 text-accent">Table View</h3>
+                    <div id="csv-table-output" class="border border-gray-300 rounded-md bg-gray-50 p-2 overflow-auto max-h-[400px]">
+                        <p class="text-secondary-text italic p-2">(Table preview will appear here)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script>
+        const csvInput = document.getElementById('csv-input');
+        const delimiterInput = document.getElementById('csv-delimiter');
+        const headerCheckbox = document.getElementById('csv-header');
+        const convertBtn = document.getElementById('convert-csv-btn');
+        const jsonOutput = document.getElementById('json-output-csv');
+        const tableOutputDiv = document.getElementById('csv-table-output');
+        const errorDiv = document.getElementById('csv-error');
+
+        // Basic CSV parser (doesn't handle complex cases like quoted delimiters well)
+        function parseCSV(csvString, delimiter = ',', hasHeader = true) {
+            const lines = csvString.trim().split(/\r?\n/);
+            if (lines.length === 0 || (lines.length === 1 && lines[0] === '')) return { headers: [], data: [] };
+
+            const headers = hasHeader ? lines[0].split(delimiter).map(h => h.trim()) : [];
+            const dataStartIndex = hasHeader ? 1 : 0;
+            const data = [];
+
+            for (let i = dataStartIndex; i < lines.length; i++) {
+                const values = lines[i].split(delimiter).map(v => v.trim());
+                if (hasHeader) {
+                    if (values.length !== headers.length && lines[i].trim() !== '') { // Allow empty lines but warn on mismatch
+                       console.warn(`Row ${i+1} has ${values.length} columns, expected ${headers.length}. Skipping row or filling with null.`);
+                       // Option 1: Skip row (Simpler)
+                       // continue;
+                       // Option 2: Pad row (More complex but keeps data)
+                       while(values.length < headers.length) values.push(null);
+                       while(values.length > headers.length) values.pop(); // Or handle excess
+                    }
+                    let rowObj = {};
+                    headers.forEach((header, index) => {
+                        rowObj[header || `column_${index+1}`] = values[index] !== undefined ? values[index] : null; // Handle potentially shorter rows
+                    });
+                     if (Object.keys(rowObj).length > 0) data.push(rowObj); // Add if not empty
+                } else {
+                     if (values.length > 0 && values.some(v => v !== '')) data.push(values); // Add array if not empty
+                }
+            }
+            return { headers, data };
+        }
+
+        function renderTable(headers, data, hasHeader) {
+            if (data.length === 0) {
+                return '<p class="text-secondary-text italic p-2">(No data to display)</p>';
+            }
+            let tableHTML = '<table>';
+            // Header Row
+            if (hasHeader && headers.length > 0) {
+                tableHTML += '<thead><tr>';
+                headers.forEach(header => tableHTML += `<th>${header.replace(/</g, '&lt;')}</th>`);
+                tableHTML += '</tr></thead>';
+            } else if (!hasHeader && data[0] && Array.isArray(data[0])) {
+                 // Add generic headers if no header row but data is array of arrays
+                 tableHTML += '<thead><tr>';
+                 data[0].forEach((_, index) => tableHTML += `<th>Column ${index + 1}</th>`);
+                 tableHTML += '</tr></thead>';
+            }
+
+            // Data Rows
+            tableHTML += '<tbody>';
+            data.forEach(row => {
+                tableHTML += '<tr>';
+                if (hasHeader && typeof row === 'object') { // Array of objects
+                    headers.forEach(header => {
+                         const value = row[header] !== null && row[header] !== undefined ? row[header] : '';
+                         tableHTML += `<td>${String(value).replace(/</g, '&lt;')}</td>`;
+                    });
+                } else if (!hasHeader && Array.isArray(row)) { // Array of arrays
+                    row.forEach(value => {
+                        const displayValue = value !== null && value !== undefined ? value : '';
+                        tableHTML += `<td>${String(displayValue).replace(/</g, '&lt;')}</td>`;
+                    });
+                }
+                tableHTML += '</tr>';
+            });
+            tableHTML += '</tbody></table>';
+            return tableHTML;
+        }
+
+        convertBtn?.addEventListener('click', () => {
+            if (!jsonOutput || !tableOutputDiv || !errorDiv) return;
+            jsonOutput.value = '';
+            tableOutputDiv.innerHTML = '<p class="text-secondary-text italic p-2">(Table preview will appear here)</p>';
+            errorDiv.textContent = '';
+            const csvText = csvInput.value;
+            const delimiter = delimiterInput.value || ',';
+            const hasHeader = headerCheckbox.checked;
+
+            if (!csvText.trim()) {
+                errorDiv.textContent = 'Please paste CSV data.';
+                return;
+            }
+
+            try {
+                const { headers, data } = parseCSV(csvText, delimiter, hasHeader);
+
+                if (data.length === 0) {
+                     errorDiv.textContent = 'No data rows found or parsed.';
+                     tableOutputDiv.innerHTML = '<p class="text-secondary-text italic p-2">(No data rows found)</p>';
+                     return;
+                }
+
+                // Output JSON
+                jsonOutput.value = JSON.stringify(data, null, 2);
+
+                // Output Table
+                tableOutputDiv.innerHTML = renderTable(headers, data, hasHeader);
+
+            } catch (e) {
+                errorDiv.textContent = `Error processing CSV: ${e.message}`;
+                console.error("CSV Processing Error:", e);
+            }
+        });
+    </script>
+</body>
+</html>

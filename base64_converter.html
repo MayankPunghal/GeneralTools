@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base64 Encoder/Decoder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { 'sans': ['Lato', 'sans-serif'], },
+                    colors: {
+                        'accent': { 'DEFAULT': '#007ACC', 'dark': '#005f9e' },
+                        'light-bg': '#f8f9fa', 'dark-text': '#212529', 'secondary-text': '#6c757d',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-light-bg font-sans text-dark-text antialiased">
+
+    <!-- Simple Header with Back Link -->
+    <header class="bg-white shadow-sm">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-accent">Base64 Encoder / Decoder</h1>
+            <a href="index.html" class="text-sm text-accent hover:underline">&larr; Back to Dashboard</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200 max-w-3xl mx-auto">
+            <!-- Encoder -->
+            <div class="mb-6 pb-6 border-b border-gray-200">
+                <h3 class="text-lg font-medium mb-2 text-accent">Encode Text</h3>
+                <div class="mb-3">
+                    <label for="base64-text-input" class="block text-sm font-medium text-secondary-text mb-1">Text to Encode (Updates automatically):</label>
+                    <textarea id="base64-text-input" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-accent focus:border-accent text-sm"></textarea>
+                </div>
+                <!-- Button still present but less necessary -->
+                <button id="encode-btn" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition duration-300 text-sm">Encode Manually</button>
+                <div class="mt-3">
+                    <label for="base64-output" class="block text-sm font-medium text-secondary-text mb-1">Base64 Output:</label>
+                    <textarea id="base64-output" rows="4" readonly class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm font-mono"></textarea>
+                </div>
+            </div>
+
+            <!-- Decoder -->
+            <div>
+                <h3 class="text-lg font-medium mb-2 text-accent">Decode Base64</h3>
+                <div class="mb-3">
+                    <label for="base64-input" class="block text-sm font-medium text-secondary-text mb-1">Base64 to Decode (Updates automatically):</label>
+                    <textarea id="base64-input" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-accent focus:border-accent text-sm font-mono"></textarea>
+                </div>
+                <!-- Button still present but less necessary -->
+                <button id="decode-btn" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition duration-300 text-sm">Decode Manually</button>
+                 <div id="decode-error" class="mt-2 text-red-600 text-sm min-h-[1.25rem]"></div> <!-- Added min-height to prevent layout shifts -->
+                <div class="mt-3">
+                    <label for="base64-decoded-output" class="block text-sm font-medium text-secondary-text mb-1">Decoded Text Output:</label>
+                    <textarea id="base64-decoded-output" rows="4" readonly class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm"></textarea>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const textInput = document.getElementById('base64-text-input');
+        const encodeBtn = document.getElementById('encode-btn');
+        const base64Output = document.getElementById('base64-output');
+
+        const base64Input = document.getElementById('base64-input');
+        const decodeBtn = document.getElementById('decode-btn');
+        const decodedOutput = document.getElementById('base64-decoded-output');
+        const decodeError = document.getElementById('decode-error');
+
+        // --- Encoding Logic ---
+        function performEncode() {
+            try {
+                // Use textInput.value directly
+                const encoded = btoa(textInput.value);
+                base64Output.value = encoded;
+            } catch (e) {
+                // Handle potential errors (e.g., characters outside Latin1 range in some environments)
+                 if (textInput.value) { // Only show error if there's input
+                    base64Output.value = 'Error encoding text.';
+                 } else {
+                    base64Output.value = ''; // Clear if input is empty
+                 }
+                console.error("Encoding error:", e);
+            }
+        }
+
+        // --- Decoding Logic ---
+        function performDecode() {
+            decodedOutput.value = ''; // Clear previous output
+            if (decodeError) decodeError.textContent = ''; // Clear previous error
+
+            const inputString = base64Input.value.trim();
+            if (!inputString) { // Do nothing if input is empty
+                return;
+            }
+
+            try {
+                const decoded = atob(inputString); // Use inputString
+                decodedOutput.value = decoded;
+            } catch (e) {
+                // Display error only if there's non-empty input that failed
+                if (decodeError) decodeError.textContent = 'Error: Invalid Base64 input.';
+                console.error("Decoding error:", e);
+            }
+        }
+
+        // --- Event Listeners ---
+
+        // Encode on button click (manual trigger)
+        encodeBtn?.addEventListener('click', performEncode);
+        // Encode on text input change
+        textInput?.addEventListener('input', performEncode);
+
+        // Decode on button click (manual trigger)
+        decodeBtn?.addEventListener('click', performDecode);
+        // Decode on base64 input change
+        base64Input?.addEventListener('input', performDecode);
+
+    </script>
+</body>
+</html>
