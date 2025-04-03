@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS Gradient Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { 'sans': ['Lato', 'sans-serif'], }, colors: { 'accent': { 'DEFAULT': '#007ACC', 'dark': '#005f9e' }, 'light-bg': '#f8f9fa', 'dark-text': '#212529', 'secondary-text': '#6c757d', } } } }
+    </script>
+    <style>
+        /* Ensure range input thumb looks decent */
+        input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 8px; background: #ddd; border-radius: 5px; outline: none; opacity: 0.7; transition: opacity .2s; margin-top: 0.25rem; margin-bottom: 0.25rem;}
+        input[type=range]:hover { opacity: 1; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; background: #007ACC; border-radius: 50%; cursor: pointer; }
+        input[type=range]::-moz-range-thumb { width: 16px; height: 16px; background: #007ACC; border-radius: 50%; cursor: pointer; border: none; }
+    </style>
+</head>
+<body class="bg-light-bg font-sans text-dark-text antialiased">
+    <header class="bg-white shadow-sm">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-accent">CSS Gradient Generator</h1>
+            <a href="index.html" class="text-sm text-accent hover:underline">&larr; Back to Dashboard</a>
+        </div>
+    </header>
+    <main class="container mx-auto px-6 py-12">
+        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Controls -->
+                <div class="md:col-span-1 space-y-4">
+                     <h3 class="text-lg font-medium mb-2 text-accent border-b pb-1">Gradient Settings</h3>
+                     <div>
+                        <label for="grad-type" class="block text-sm font-medium text-secondary-text mb-1">Type:</label>
+                        <select id="grad-type" class="control-input bg-white">
+                            <option value="linear" selected>Linear</option>
+                            <option value="radial">Radial</option>
+                        </select>
+                    </div>
+                    <!-- Linear Only Controls -->
+                    <div id="linear-controls">
+                        <label for="grad-angle" class="block text-sm font-medium text-secondary-text mb-1">Angle (degrees):</label>
+                        <div class="flex items-center gap-2">
+                            <input type="range" id="grad-angle" min="0" max="360" value="90" class="flex-grow">
+                            <input type="number" id="grad-angle-num" min="0" max="360" value="90" class="w-16 text-sm border border-gray-300 rounded px-2 py-1">
+                        </div>
+                    </div>
+                     <!-- Radial Only Controls -->
+                    <div id="radial-controls" class="hidden">
+                         <label for="grad-shape" class="block text-sm font-medium text-secondary-text mb-1">Shape:</label>
+                         <select id="grad-shape" class="control-input bg-white">
+                            <option value="ellipse" selected>Ellipse</option>
+                            <option value="circle">Circle</option>
+                        </select>
+                         <label for="grad-position" class="block text-sm font-medium text-secondary-text mb-1 mt-2">Position:</label>
+                         <select id="grad-position" class="control-input bg-white">
+                             <option value="center" selected>Center</option>
+                             <option value="top">Top</option>
+                             <option value="bottom">Bottom</option>
+                             <option value="left">Left</option>
+                             <option value="right">Right</option>
+                             <option value="top left">Top Left</option>
+                             <option value="top right">Top Right</option>
+                             <option value="bottom left">Bottom Left</option>
+                             <option value="bottom right">Bottom Right</option>
+                         </select>
+                    </div>
+                    <div class="border-t pt-4">
+                         <h4 class="text-base font-medium text-secondary-text mb-2">Color Stops</h4>
+                         <div id="color-stops" class="space-y-3">
+                            <!-- Color stops will be added here -->
+                         </div>
+                         <button id="add-color-stop" class="mt-3 bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1 rounded text-xs">+ Add Color Stop</button>
+                    </div>
+                </div>
+
+                <!-- Preview & Output -->
+                <div class="md:col-span-2">
+                     <h3 class="text-lg font-medium mb-2 text-accent border-b pb-1">Preview & Code</h3>
+                    <div id="gradient-preview" class="h-64 w-full border border-gray-300 rounded-md mb-4 bg-gray-100">
+                        <!-- Gradient applied here -->
+                    </div>
+                    <div>
+                        <label for="css-output" class="block text-sm font-medium text-secondary-text mb-1">CSS Output:</label>
+                        <textarea id="css-output" rows="4" readonly class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm font-mono"></textarea>
+                        <button id="copy-css-btn" class="mt-2 bg-gray-500 text-white px-3 py-1 rounded-md hover:bg-gray-600 transition duration-300 text-xs opacity-0 transition-opacity" title="Copy CSS">Copy CSS</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script>
+        const gradTypeSelect = document.getElementById('grad-type');
+        const linearControls = document.getElementById('linear-controls');
+        const radialControls = document.getElementById('radial-controls');
+        const angleRange = document.getElementById('grad-angle');
+        const angleNum = document.getElementById('grad-angle-num');
+        const shapeSelect = document.getElementById('grad-shape');
+        const positionSelect = document.getElementById('grad-position');
+        const colorStopsContainer = document.getElementById('color-stops');
+        const addColorBtn = document.getElementById('add-color-stop');
+        const previewDiv = document.getElementById('gradient-preview');
+        const cssOutput = document.getElementById('css-output');
+        const copyCssBtn = document.getElementById('copy-css-btn');
+
+        let colorStopCount = 0;
+        let colorStopsData = []; // Array to hold { id, color, position }
+
+        function createColorStopElement(id, initialColor = '#ffffff', initialPosition = 0) {
+            colorStopCount++;
+            const stopId = `stop-${id}`;
+            const wrapper = document.createElement('div');
+            wrapper.className = 'flex items-center gap-2 border-b border-dashed pb-2';
+            wrapper.dataset.id = stopId;
+
+            // Color Picker
+            const colorInput = document.createElement('input');
+            colorInput.type = 'color';
+            colorInput.id = `color-${stopId}`;
+            colorInput.value = initialColor;
+            colorInput.className = 'h-8 w-8 border border-gray-300 rounded p-0 cursor-pointer';
+            colorInput.addEventListener('input', updateGradient);
+
+            // Position Slider
+            const positionRange = document.createElement('input');
+            positionRange.type = 'range';
+            positionRange.id = `pos-${stopId}`;
+            positionRange.min = 0;
+            positionRange.max = 100;
+            positionRange.value = initialPosition;
+            positionRange.className = 'flex-grow';
+            positionRange.addEventListener('input', (e) => {
+                numInput.value = e.target.value; // Sync slider and number input
+                updateGradient();
+            });
+
+             // Position Number Input
+            const numInput = document.createElement('input');
+            numInput.type = 'number';
+            numInput.min = 0;
+            numInput.max = 100;
+            numInput.value = initialPosition;
+            numInput.className = 'w-14 text-xs border border-gray-300 rounded px-1 py-0.5';
+            numInput.addEventListener('input', (e) => {
+                positionRange.value = e.target.value; // Sync number input and slider
+                updateGradient();
+            });
+
+            // Remove Button
+            const removeBtn = document.createElement('button');
+            removeBtn.textContent = '✖';
+            removeBtn.className = 'text-red-500 hover:text-red-700 text-xs';
+            removeBtn.title = 'Remove Color Stop';
+            removeBtn.onclick = () => {
+                wrapper.remove();
+                updateGradient(); // Update after removing
+                 // Prevent removing last two stops
+                checkRemoveButtons();
+            };
+
+            wrapper.appendChild(colorInput);
+            wrapper.appendChild(positionRange);
+            wrapper.appendChild(numInput);
+            wrapper.appendChild(document.createTextNode('%')); // Percentage sign
+            wrapper.appendChild(removeBtn);
+            colorStopsContainer.appendChild(wrapper);
+
+             checkRemoveButtons(); // Enable/disable remove buttons
+
+            return wrapper;
+        }
+
+        function checkRemoveButtons() {
+            const currentStops = colorStopsContainer.querySelectorAll('div[data-id]');
+            currentStops.forEach((stopDiv, index) => {
+                const btn = stopDiv.querySelector('button');
+                if (btn) btn.disabled = currentStops.length <= 2; // Disable remove if only 2 stops remain
+                 btn.classList.toggle('opacity-50', btn.disabled);
+                 btn.classList.toggle('cursor-not-allowed', btn.disabled);
+
+            });
+        }
+
+
+        function updateGradient() {
+            colorStopsData = []; // Reset and rebuild data array
+            const currentStops = colorStopsContainer.querySelectorAll('div[data-id]');
+             currentStops.forEach(stopDiv => {
+                const color = stopDiv.querySelector('input[type="color"]').value;
+                const position = stopDiv.querySelector('input[type="range"]').value;
+                colorStopsData.push({ color, position });
+            });
+
+            // Sort stops by position for correct CSS generation
+            colorStopsData.sort((a, b) => a.position - b.position);
+
+            const type = gradTypeSelect.value;
+            let gradientString = '';
+            const stopsString = colorStopsData.map(s => `${s.color} ${s.position}%`).join(', ');
+
+            if (type === 'linear') {
+                const angle = angleRange.value;
+                gradientString = `linear-gradient(${angle}deg, ${stopsString})`;
+            } else if (type === 'radial') {
+                const shape = shapeSelect.value;
+                const position = positionSelect.value;
+                 gradientString = `radial-gradient(${shape} at ${position}, ${stopsString})`;
+            }
+
+            if(previewDiv) previewDiv.style.background = gradientString;
+            if(cssOutput) cssOutput.value = `background-image: ${gradientString};`;
+            if(copyCssBtn) copyCssBtn.style.opacity = gradientString ? '1' : '0';
+            if(copyCssBtn) copyCssBtn.textContent = 'Copy CSS';
+        }
+
+        // Event Listeners for main controls
+        gradTypeSelect?.addEventListener('change', (e) => {
+            const isLinear = e.target.value === 'linear';
+            linearControls.classList.toggle('hidden', !isLinear);
+            radialControls.classList.toggle('hidden', isLinear);
+            updateGradient();
+        });
+        angleRange?.addEventListener('input', (e) => { angleNum.value = e.target.value; updateGradient(); });
+        angleNum?.addEventListener('input', (e) => { angleRange.value = e.target.value; updateGradient(); });
+        shapeSelect?.addEventListener('change', updateGradient);
+        positionSelect?.addEventListener('change', updateGradient);
+        addColorBtn?.addEventListener('click', () => {
+            // Add new stop, maybe position it halfway between last and 100%
+             const lastPos = colorStopsData.length > 0 ? parseInt(colorStopsData[colorStopsData.length - 1].position) : 0;
+             const newPos = Math.min(100, Math.round(lastPos + (100 - lastPos) / 2));
+             createColorStopElement(colorStopCount + 1, '#eeeeee', newPos);
+             updateGradient();
+        });
+
+        // Copy Button
+         copyCssBtn?.addEventListener('click', () => {
+            if (!cssOutput.value) return;
+            navigator.clipboard.writeText(cssOutput.value).then(() => {
+                copyCssBtn.textContent = 'Copied!';
+                setTimeout(() => { copyCssBtn.textContent = 'Copy CSS'; }, 1500);
+            }).catch(err => { console.error('Copy failed: ', err); alert('Copy failed.'); });
+        });
+
+
+        // Initial Setup
+        createColorStopElement(1, '#007ACC', 0); // Start color
+        createColorStopElement(2, '#FFFFFF', 100); // End color
+        updateGradient(); // Render initial gradient
+
+    </script>
+     <!-- Simple CSS for controls -->
+     <style> .control-input { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-shadow: inset 0 1px 2px 0 rgb(0 0 0 / 0.05); } </style>
+</body>
+</html>
