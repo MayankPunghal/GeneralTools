@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Palette Generator</title>
+    <style>
+         /* Basic Reset & Body */
+        *, *::before, *::after { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 15px;
+            background-color: #f4f7f9;
+            color: #333;
+        }
+
+        /* Container & Sections */
+        .container {
+            max-width: 900px; /* Adjusted max-width */
+            margin: 15px auto;
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+            margin-top: 0;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e0e6ec;
+        }
+        h1 { text-align: center; border-bottom-width: 2px; }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+            font-size: 0.9em;
+        }
+        select, input[type="text"], input[type="color"], button {
+            padding: 8px 12px;
+            margin-bottom: 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            max-width: 100%; /* Prevent overflow */
+        }
+        input[type="color"] { padding: 2px; height: 40px; vertical-align: middle; /* Align better */ }
+        button {
+            background-color: #3498db;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            border: none;
+            margin-right: 5px;
+        }
+        button:hover { background-color: #2980b9; }
+        button.secondary { background-color: #7f8c8d; }
+        button.secondary:hover { background-color: #6c7a7d; }
+        button.danger { background-color: #e74c3c; }
+        button.danger:hover { background-color: #c0392b; }
+        button.small { padding: 4px 8px; font-size: 0.8em; }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px 20px;
+            margin-bottom: 20px;
+            align-items: flex-end; /* Align controls nicely */
+        }
+        .control-group { display: flex; flex-direction: column; }
+
+        /* --- Color Palette Specific Styles --- */
+        #palette-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            min-height: 80px;
+            align-items: stretch; /* Make swatches same height */
+        }
+        .color-swatch {
+            flex: 1; /* Distribute space */
+            min-width: 80px; /* Minimum width before wrapping */
+            min-height: 80px;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end; /* Align text to bottom */
+            padding: 5px;
+            font-size: 0.75em;
+            color: white; /* Default text color */
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            border: 1px solid rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+        }
+        .color-swatch:hover {
+            transform: scale(1.03);
+            z-index: 10;
+        }
+         .color-swatch span { display: block; word-break: break-all; line-height: 1.3; }
+        .color-swatch .remove-color {
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            background-color: rgba(255,255,255,0.7);
+            color: #e74c3c;
+            border: none;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 12px;
+            line-height: 16px;
+            text-align: center;
+            cursor: pointer;
+            opacity: 0; /* Hidden by default */
+            transition: opacity 0.2s;
+            z-index: 1;
+        }
+         .color-swatch:hover .remove-color { opacity: 1; }
+        .color-management { margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee;}
+        #savedPalettesSection label, #savedPalettesSection select, #savedPalettesSection button { margin-right: 10px; margin-bottom: 10px; }
+        .feedback { padding: 10px; border-radius: 4px; margin-top: 15px; font-size: 0.9em; display: none; text-align: center; }
+        .feedback.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .feedback.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .feedback.info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+
+        input[type="file"] { display: none; } /* Hide default file input */
+    </style>
+    <!-- TinyColor library for color manipulation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinycolor/1.6.0/tinycolor.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Color Palette Generator & Manager</h1>
+        <p>Create, generate, save, and manage color palettes for your projects.</p>
+
+         <section>
+            <h3>Generate / Add Colors</h3>
+            <div class="controls-grid">
+                 <div class="control-group">
+                    <label for="baseColor">Base Color:</label>
+                    <input type="color" id="baseColor" value="#3498db">
+                </div>
+                 <div class="control-group">
+                    <label for="paletteRule">Generation Rule:</label>
+                    <select id="paletteRule">
+                        <option value="manual">Manual Only</option>
+                        <option value="complementary">Complementary (2)</option>
+                        <option value="analogous">Analogous (3)</option>
+                        <option value="triadic">Triadic (3)</option>
+                        <option value="tetradic">Tetradic (4)</option>
+                        <option value="monochromatic">Monochromatic (5)</option>
+                        <option value="splitcomplement">Split Complementary (3)</option>
+                    </select>
+                 </div>
+                 <div class="control-group">
+                      <label>&nbsp;</label> <!-- Spacer -->
+                      <button id="generatePaletteBtn">Generate/Update Palette</button>
+                 </div>
+                  <div class="control-group">
+                      <label for="addColorManual">Add Color Manually:</label>
+                      <div style="display: flex; gap: 5px;">
+                         <input type="color" id="addColorManualValue" value="#cccccc">
+                         <button id="addColorManualBtn" style="flex-grow: 1;">Add</button>
+                     </div>
+                 </div>
+            </div>
+        </section>
+
+        <section>
+            <h3>Current Palette Preview</h3>
+            <p style="font-size: 0.85em; color: #555; margin-top: -15px;">Click a swatch to copy its HEX code. Hover to see the remove button.</p>
+            <div id="palette-preview">
+                <!-- Color swatches will be added here -->
+            </div>
+        </section>
+
+        <section class="color-management">
+             <h3>Manage Palettes</h3>
+             <div class="controls-grid">
+                 <div class="control-group">
+                     <label for="paletteName">Palette Name:</label>
+                     <input type="text" id="paletteName" placeholder="My Awesome Palette">
+                 </div>
+                 <div class="control-group">
+                      <label>&nbsp;</label>
+                      <button id="savePaletteBtn">Save Current Palette</button>
+                 </div>
+             </div>
+
+            <div id="savedPalettesSection" class="controls-grid" style="align-items: flex-end;">
+                <div class="control-group">
+                    <label for="savedPalettesDropdown">Load Saved Palette:</label>
+                    <select id="savedPalettesDropdown">
+                        <option value="">-- Select a palette --</option>
+                        <!-- Saved palettes listed here -->
+                    </select>
+                </div>
+                 <div class="control-group">
+                     <button id="loadPaletteBtn">Load</button>
+                     <button id="deletePaletteBtn" class="danger">Delete Selected</button>
+                </div>
+                 <div class="control-group">
+                    <button id="exportPaletteBtn" class="secondary">Export Current (.json)</button>
+                    <button id="importPaletteBtnTrigger" class="secondary">Import Palette (.json)</button>
+                    <input type="file" id="importPaletteFile" accept=".json">
+                </div>
+            </div>
+        </section>
+        <div id="paletteFeedback" class="feedback"></div>
+
+    </div> <!-- /.container -->
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            console.log("DOM Loaded. TinyColor object:", typeof tinycolor); // Check if tinycolor is loaded
+
+            // --- Helper Function ---
+            function showFeedback(elementId, message, type = 'success', duration = 3000) {
+                const feedbackEl = document.getElementById(elementId);
+                if (!feedbackEl) return;
+                feedbackEl.textContent = message;
+                feedbackEl.className = `feedback ${type}`;
+                feedbackEl.style.display = 'block';
+                if (duration > 0) {
+                    setTimeout(() => {
+                        feedbackEl.style.display = 'none';
+                    }, duration);
+                }
+            }
+
+            // ============================ //
+            // === COLOR PALETTE LOGIC ==== //
+            // ============================ //
+             const baseColorInput = document.getElementById('baseColor');
+             const paletteRuleSelect = document.getElementById('paletteRule');
+             const generateBtn = document.getElementById('generatePaletteBtn');
+             const addColorManualValueInput = document.getElementById('addColorManualValue');
+             const addColorManualBtn = document.getElementById('addColorManualBtn');
+             const palettePreviewContainer = document.getElementById('palette-preview');
+             const paletteNameInput = document.getElementById('paletteName');
+             const savePaletteBtn = document.getElementById('savePaletteBtn');
+             const savedPalettesDropdown = document.getElementById('savedPalettesDropdown');
+             const loadPaletteBtn = document.getElementById('loadPaletteBtn');
+             const deletePaletteBtn = document.getElementById('deletePaletteBtn');
+             const exportPaletteBtn = document.getElementById('exportPaletteBtn');
+             const importPaletteBtnTrigger = document.getElementById('importPaletteBtnTrigger');
+             const importPaletteFileInput = document.getElementById('importPaletteFile');
+             const feedbackElId = 'paletteFeedback';
+
+             const LS_PALETTES_KEY = 'devToolbox_savedPalettes';
+
+             let currentPalette = [];
+             let savedPalettes = {};
+
+            // *** REVISED getColorInfo Function ***
+            function getColorInfo(colorInput) {
+                // 1. Check if tinycolor library is available
+                if (typeof tinycolor === 'undefined') {
+                    console.error("TinyColor library is not loaded!");
+                    showFeedback(feedbackElId, 'Error: Color processing library (TinyColor) failed to load. Check internet connection or console errors.', 'error', 0);
+                    return null;
+                }
+
+                // 2. Log the input for debugging
+                console.log("getColorInfo processing input:", colorInput);
+
+                let color;
+                try {
+                    // 3. Instantiate tinycolor. It should handle various input formats (hex, rgb strings, etc.)
+                    color = tinycolor(colorInput);
+
+                    // 4. Check validity robustly
+                    if (!color || !color.isValid()) {
+                        console.warn("TinyColor marked input as invalid:", colorInput, "Parsed as:", color);
+                        return null;
+                    }
+
+                    // 5. Extract information
+                    const info = {
+                        hex: color.toHexString().toLowerCase(), // Standardize to lowercase
+                        rgb: color.toRgbString(),
+                        hsl: color.toHslString(),
+                        isDark: color.isDark()
+                    };
+                    console.log("Successfully generated color info:", info);
+                    return info;
+
+                } catch (error) {
+                    // 6. Catch any unexpected errors during tinycolor processing
+                    console.error("Error during tinycolor processing for input:", colorInput, error);
+                    return null;
+                }
+            }
+             // *** END OF REVISED FUNCTION ***
+
+            function generatePalette() {
+                const baseColorValue = baseColorInput.value;
+                const rule = paletteRuleSelect.value;
+                let newGeneratedColors = [];
+
+                const baseInfo = getColorInfo(baseColorValue);
+                if (!baseInfo) {
+                    showFeedback(feedbackElId, `Invalid Base Color: "${baseColorValue}" could not be processed.`, 'error');
+                    return; // Stop if base color is invalid
+                }
+
+                if (rule !== 'manual') {
+                    const baseColor = tinycolor(baseColorValue);
+                    if (!baseColor || !baseColor.isValid()) { // Should be caught by baseInfo check, but double-check
+                         showFeedback(feedbackElId, `Error re-parsing Base Color: "${baseColorValue}".`, 'error');
+                         return;
+                    }
+
+                    try {
+                         let results = [];
+                         switch (rule) {
+                             case 'complementary': results = [baseColor.complement()]; break;
+                             case 'analogous': results = baseColor.analogous().slice(1); break; // Exclude base
+                             case 'triadic': results = baseColor.triad().slice(1); break; // Exclude base
+                             case 'tetradic': results = baseColor.tetrad().slice(1); break; // Exclude base
+                             case 'monochromatic': results = baseColor.monochromatic().slice(1, 6); break; // Take up to 5 more
+                             case 'splitcomplement': results = baseColor.splitcomplement().slice(1); break; // Exclude base
+                             default: results = [];
+                         }
+                         // Convert results to our info format and filter nulls
+                         newGeneratedColors = results.map(c => getColorInfo(c)).filter(info => info !== null);
+
+                         // Update currentPalette: Keep base, add new generated colors
+                         currentPalette = [baseInfo, ...newGeneratedColors];
+
+                     } catch (error) {
+                        console.error("Error during color generation rule execution:", error);
+                        showFeedback(feedbackElId, 'Error generating colors based on rule. Check console.', 'error');
+                        currentPalette = [baseInfo]; // Reset to just base on error
+                    }
+                } else {
+                    // Rule is 'manual' - Ensure base color is present if palette empty
+                    if (currentPalette.length === 0) {
+                        currentPalette = [baseInfo];
+                    } else {
+                        // If manual and not empty, maybe update the *first* color to the base color?
+                        // Or just leave it alone? Let's update the first color to reflect the base input.
+                        currentPalette[0] = baseInfo;
+                    }
+                }
+                renderPalette();
+            }
+
+             function addManualColor() {
+                  const colorInfo = getColorInfo(addColorManualValueInput.value);
+                  if (colorInfo) {
+                      if (!currentPalette.some(c => c.hex === colorInfo.hex)) {
+                          currentPalette.push(colorInfo);
+                          renderPalette();
+                      } else {
+                          showFeedback(feedbackElId, `Color ${colorInfo.hex} already exists.`, 'info', 2000);
+                      }
+                  } else {
+                       showFeedback(feedbackElId, `Invalid Manual Color: "${addColorManualValueInput.value}" could not be added.`, 'error');
+                   }
+             }
+
+             function removeColor(index) {
+                 if (index >= 0 && index < currentPalette.length) {
+                     currentPalette.splice(index, 1);
+                     renderPalette();
+                 }
+             }
+
+             function renderPalette() {
+                 palettePreviewContainer.innerHTML = '';
+                 if (currentPalette.length === 0) {
+                      palettePreviewContainer.innerHTML = '<p style="color:#888; font-style:italic;">Palette is empty.</p>';
+                      return;
+                 }
+                 currentPalette.forEach((color, index) => {
+                     if (!color || !color.hex || !color.rgb || !color.hsl) {
+                         console.warn("Attempting to render invalid color object at index:", index, color);
+                         return;
+                     }
+                     const swatch = document.createElement('div');
+                     swatch.classList.add('color-swatch');
+                     swatch.style.backgroundColor = color.hex;
+                     swatch.style.color = color.isDark ? 'white' : 'black';
+                     swatch.style.textShadow = color.isDark ? '1px 1px 2px rgba(0,0,0,0.7)' : '1px 1px 2px rgba(255,255,255,0.7)';
+
+                     swatch.innerHTML = `
+                         <span>${color.hex}</span>
+                         <span style="font-size: 0.9em;">${color.rgb}</span>
+                         <span style="font-size: 0.9em;">${color.hsl}</span>
+                         <button class="remove-color" title="Remove color" data-index="${index}">&times;</button>
+                     `;
+                      swatch.querySelector('.remove-color').addEventListener('click', (e) => {
+                          e.stopPropagation(); removeColor(index);
+                      });
+                     swatch.addEventListener('click', () => {
+                         navigator.clipboard.writeText(color.hex).then(() => {
+                              showFeedback(feedbackElId, `Copied ${color.hex} to clipboard!`, 'info', 1500);
+                          }).catch(err => {
+                               console.error("Clipboard copy failed:", err);
+                               showFeedback(feedbackElId, 'Failed to copy color.', 'error');
+                           });
+                      });
+                     palettePreviewContainer.appendChild(swatch);
+                 });
+             }
+
+             // --- Palette Management (Functions remain largely the same) ---
+             function loadSavedPalettes() {
+                 const stored = localStorage.getItem(LS_PALETTES_KEY);
+                 try {
+                     savedPalettes = stored ? JSON.parse(stored) : {};
+                     if (typeof savedPalettes !== 'object' || savedPalettes === null || Array.isArray(savedPalettes)) {
+                         console.warn("Invalid palette data in localStorage, resetting."); savedPalettes = {}; localStorage.removeItem(LS_PALETTES_KEY);
+                     }
+                 } catch (e) {
+                      console.error("Error parsing saved palettes:", e); savedPalettes = {}; localStorage.removeItem(LS_PALETTES_KEY);
+                 }
+                 renderSavedPalettesDropdown();
+             }
+            function saveCurrentPalette() {
+                const name = paletteNameInput.value.trim();
+                if (!name) { showFeedback(feedbackElId, 'Please enter palette name.', 'error'); return; }
+                if (currentPalette.length === 0) { showFeedback(feedbackElId, 'Cannot save empty palette.', 'error'); return; }
+                const validPaletteToSave = currentPalette.filter(c => c && c.hex);
+                if (validPaletteToSave.length !== currentPalette.length) { showFeedback(feedbackElId, 'Warning: Invalid color data detected, only valid colors saved.', 'error', 5000); }
+                if (validPaletteToSave.length === 0) { showFeedback(feedbackElId, 'Cannot save palette with no valid colors.', 'error'); return; }
+                if (savedPalettes[name] && !confirm(`Overwrite palette "${name}"?`)) { return; }
+                savedPalettes[name] = [...validPaletteToSave];
+                try {
+                    localStorage.setItem(LS_PALETTES_KEY, JSON.stringify(savedPalettes));
+                    renderSavedPalettesDropdown(); savedPalettesDropdown.value = name;
+                    showFeedback(feedbackElId, `Palette "${name}" saved.`, 'success');
+                } catch(e) { console.error("Error saving palette:", e); showFeedback(feedbackElId, 'Error saving palette.', 'error'); }
+            }
+             function renderSavedPalettesDropdown() {
+                 const currentSelection = savedPalettesDropdown.value;
+                 savedPalettesDropdown.innerHTML = '<option value="">-- Select a palette --</option>';
+                 Object.keys(savedPalettes).sort().forEach(name => {
+                     const option = document.createElement('option'); option.value = name; option.textContent = name; savedPalettesDropdown.appendChild(option);
+                 });
+                 if (savedPalettes[currentSelection]) { savedPalettesDropdown.value = currentSelection; }
+             }
+             function loadSelectedPalette() {
+                 const name = savedPalettesDropdown.value; if (!name || !savedPalettes[name]) { return; }
+                 const loadedColors = savedPalettes[name];
+                 if(Array.isArray(loadedColors)) {
+                    currentPalette = [...loadedColors]; paletteNameInput.value = name; renderPalette();
+                    showFeedback(feedbackElId, `Palette "${name}" loaded.`, 'info');
+                 } else { showFeedback(feedbackElId, `Error loading palette "${name}".`, 'error'); }
+             }
+             function deleteSelectedPalette() {
+                 const name = savedPalettesDropdown.value; if (!name || !savedPalettes[name]) { showFeedback(feedbackElId, 'Select palette to delete.', 'error'); return; }
+                 if (confirm(`Delete palette "${name}"?`)) {
+                     delete savedPalettes[name]; localStorage.setItem(LS_PALETTES_KEY, JSON.stringify(savedPalettes)); renderSavedPalettesDropdown();
+                     if (paletteNameInput.value === name) { paletteNameInput.value = ''; currentPalette = []; renderPalette(); }
+                     showFeedback(feedbackElId, `Palette "${name}" deleted.`, 'success');
+                 }
+             }
+             function exportCurrentPalette() {
+                 if (currentPalette.length === 0) { showFeedback(feedbackElId, 'Palette empty, cannot export.', 'error'); return; }
+                 const name = paletteNameInput.value.trim() || 'untitled_palette';
+                 const dataToExport = { name: name, colors: currentPalette };
+                 const jsonString = JSON.stringify(dataToExport, null, 2); const blob = new Blob([jsonString], { type: 'application/json' });
+                 const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url;
+                 a.download = `${name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.json`;
+                 document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+                 showFeedback(feedbackElId, 'Palette exported.', 'success');
+             }
+             function handleImportPalette(event) {
+                 const file = event.target.files[0]; if (!file) return; const reader = new FileReader();
+                 reader.onload = (e) => {
+                     try {
+                         const importedData = JSON.parse(e.target.result);
+                         if (!importedData || typeof importedData.name !== 'string' || !Array.isArray(importedData.colors)) { throw new Error("Invalid JSON structure."); }
+                         const validatedColors = importedData.colors.map(c => { if (typeof c === 'string') { return getColorInfo(c); } if (typeof c === 'object' && c !== null && c.hex) { const info = getColorInfo(c.hex); return info ? { ...c, ...info } : null; } return null; }).filter(info => info !== null);
+                         if (validatedColors.length === 0 && importedData.colors.length > 0) { throw new Error("No valid colors parsed."); }
+                         currentPalette = validatedColors; paletteNameInput.value = importedData.name; renderPalette();
+                         showFeedback(feedbackElId, `Palette "${importedData.name}" imported. Save if needed.`, 'success', 5000);
+                     } catch (error) { showFeedback(feedbackElId, `Import Error: ${error.message}`, 'error'); }
+                     finally { importPaletteFileInput.value = ''; }
+                 };
+                 reader.onerror = () => { showFeedback(feedbackElId, 'Error reading file.', 'error'); importPaletteFileInput.value = ''; };
+                 reader.readAsText(file);
+             }
+
+             // Event Listeners
+             generateBtn.addEventListener('click', generatePalette);
+             addColorManualBtn.addEventListener('click', addManualColor);
+             savePaletteBtn.addEventListener('click', saveCurrentPalette);
+             loadPaletteBtn.addEventListener('click', loadSelectedPalette);
+             deletePaletteBtn.addEventListener('click', deleteSelectedPalette);
+             exportPaletteBtn.addEventListener('click', exportCurrentPalette);
+             importPaletteBtnTrigger.addEventListener('click', () => importPaletteFileInput.click());
+             importPaletteFileInput.addEventListener('change', handleImportPalette);
+
+             // Initial Load
+             loadSavedPalettes();
+             if (currentPalette.length === 0 && Object.keys(savedPalettes).length === 0) {
+                if (!baseColorInput.value) baseColorInput.value = "#3498db";
+                generatePalette();
+             } else {
+                 renderPalette();
+             }
+
+        }); // End DOMContentLoaded
+    </script>
+
+</body>
+</html>

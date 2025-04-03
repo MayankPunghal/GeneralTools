@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Request Tester</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet"> <!-- Added Fira Code -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Lato', 'sans-serif'],
+                        'mono': ['Fira Code', 'monospace'], // Use Fira Code for monospace
+                    },
+                    colors: {
+                        'accent': { 'DEFAULT': '#007ACC', 'dark': '#005f9e' },
+                        'light-bg': '#f8f9fa', // Main page background
+                        'panel-bg': '#ffffff', // White panel background
+                        'input-bg': '#ffffff', // Input background
+                        'output-bg': '#f3f4f6', // Slightly off-white for read-only outputs
+                        'code-bg': '#1f2937',  // Dark background for code/JSON
+                        'code-text': '#d1d5db', // Light text for code
+                        'dark-text': '#1f2937', // Darker text (gray-800)
+                        'medium-text': '#4b5563', // Medium text (gray-600)
+                        'secondary-text': '#6b7280', // Lighter text (gray-500)
+                        'border-color': '#d1d5db', // Default border (gray-300)
+                        'success': '#10b981', // Green-500
+                        'error': '#ef4444',   // Red-500
+                        'warning': '#f59e0b', // Amber-500
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom styles for better UI elements */
+        .tab-button {
+            @apply px-4 py-2 text-sm font-medium border-b-2 transition-colors duration-150 focus:outline-none;
+        }
+        .tab-button.active {
+            @apply border-accent text-accent;
+        }
+        .tab-button:not(.active) {
+            @apply border-transparent text-secondary-text hover:text-dark-text hover:border-gray-300;
+        }
+        .tab-content {
+            @apply p-4 border border-t-0 rounded-b-lg border-border-color bg-white; /* Consistent border */
+        }
+         /* Custom focus ring to match accent */
+        input:focus, textarea:focus, select:focus {
+             @apply ring-1 ring-accent border-accent;
+        }
+         /* Style the code output areas */
+         pre.code-output {
+            @apply bg-code-bg text-code-text text-xs p-4 rounded-md overflow-auto max-h-96 font-mono; /* Use Fira Code */
+            white-space: pre-wrap;
+            word-wrap: break-word;
+         }
+         /* Basic loading spinner */
+         @keyframes spin { to { transform: rotate(360deg); } }
+         .spinner {
+            display: inline-block;
+            width: 1em; height: 1em;
+            border: 2px solid currentColor;
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spin .75s linear infinite;
+            vertical-align: text-bottom;
+            margin-left: 0.5em;
+         }
+    </style>
+</head>
+<body class="bg-light-bg font-sans text-dark-text antialiased">
+    <header class="bg-panel-bg shadow-sm sticky top-0 z-20"> <!-- Make header sticky -->
+        <div class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <h1 class="text-xl font-semibold text-dark-text">API Request Tester</h1>
+            <a href="index.html" class="text-sm text-accent hover:underline">&larr; Back to Dashboard</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-8">
+        <div class="bg-panel-bg p-6 lg:p-8 rounded-lg shadow-lg border border-border-color">
+            <p class="text-xs text-orange-600 italic mb-6 border-l-4 border-orange-400 pl-3 py-1 bg-orange-50 rounded-r">
+                <strong>Note:</strong> Browser CORS restrictions apply. Requests might fail unless the target server allows requests from this origin (check `Access-Control-Allow-Origin` header) or if using a browser extension for development purposes.
+            </p>
+
+            <!-- Request Setup Section -->
+            <div class="mb-6">
+                <label for="request-url" class="block text-sm font-medium text-medium-text mb-1">Request URL</label>
+                <div class="flex flex-wrap sm:flex-nowrap items-stretch shadow-sm">
+                    <select id="http-method" class="px-3 py-2 border border-border-color rounded-l-md bg-gray-50 text-sm font-medium focus:outline-none focus:z-10">
+                        <option>GET</option>
+                        <option>POST</option>
+                        <option>PUT</option>
+                        <option>DELETE</option>
+                        <option>PATCH</option>
+                        <option>OPTIONS</option>
+                        <option>HEAD</option>
+                    </select>
+                    <input type="url" id="request-url" placeholder="https://api.example.com/resource" required
+                           class="flex-grow px-3 py-2 border-t border-b border-r sm:border-l-0 border-border-color focus:outline-none focus:z-10 text-sm font-mono">
+                    <button id="send-request-btn" class="bg-accent text-white px-5 py-2 rounded-r-md hover:bg-accent-dark focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-accent transition duration-150 text-sm font-semibold inline-flex items-center justify-center">
+                        <span id="send-btn-text">Send</span>
+                        <span id="send-spinner" class="spinner hidden"></span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Request Details Tabs -->
+            <div class="mb-6">
+                <div class="border-b border-border-color">
+                    <nav class="-mb-px flex space-x-4" aria-label="Request Tabs">
+                        <button class="tab-button active" data-tab="headers">Headers</button>
+                        <button class="tab-button" data-tab="body">Body</button>
+                        <!-- Maybe add Params/Auth tabs later -->
+                    </nav>
+                </div>
+                <div class="mt-0"> <!-- Content divs directly follow tabs -->
+                    <div class="tab-content" data-tab-content="headers">
+                        <label for="request-headers" class="block text-xs font-medium text-secondary-text mb-1">Enter headers (key: value, one per line)</label>
+                        <textarea id="request-headers" rows="5" placeholder="Content-Type: application/json&#10;Authorization: Bearer YOUR_TOKEN" class="w-full px-3 py-2 border border-border-color rounded-md text-sm font-mono focus:outline-none"></textarea>
+                    </div>
+                    <div class="tab-content hidden" data-tab-content="body">
+                        <label for="request-body" class="block text-xs font-medium text-secondary-text mb-1">Request body (e.g., JSON for POST/PUT/PATCH)</label>
+                        <textarea id="request-body" rows="8" placeholder='{ "key": "value" }' class="w-full px-3 py-2 border border-border-color rounded-md text-sm font-mono focus:outline-none"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Response Section -->
+            <div class="mt-8">
+                <h2 class="text-lg font-semibold mb-4 text-dark-text border-t border-border-color pt-4">Response</h2>
+                <div id="response-status" class="mb-4 flex justify-between items-center text-sm">
+                    <span>Status: <strong id="status-code" class="font-mono px-2 py-0.5 rounded text-xs font-semibold bg-gray-200 text-gray-700">(Waiting)</strong></span>
+                    <span>Time: <strong id="response-time" class="font-mono">(N/A)</strong></span>
+                </div>
+                 <div class="border-b border-border-color">
+                     <nav class="-mb-px flex space-x-4" aria-label="Response Tabs">
+                        <button class="response-tab-button active" data-response-tab="response-body">Body</button>
+                        <button class="response-tab-button" data-response-tab="response-headers">Headers</button>
+                    </nav>
+                 </div>
+                 <div class="mt-0">
+                    <div class="response-tab-content" data-response-tab-content="response-body">
+                         <pre id="response-body" class="code-output min-h-[150px]"></pre>
+                    </div>
+                     <div class="response-tab-content hidden" data-response-tab-content="response-headers">
+                         <pre id="response-headers" class="code-output min-h-[150px]"></pre>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+     <footer class="text-center py-4 mt-8">
+        <a href="index.html" class="text-xs text-secondary-text hover:text-accent">&larr; Back to Dashboard</a>
+    </footer>
+
+    <script>
+        // Get references to all elements
+        const methodSelect = document.getElementById('http-method');
+        const urlInput = document.getElementById('request-url');
+        const headersInput = document.getElementById('request-headers');
+        const bodyInput = document.getElementById('request-body');
+        const sendBtn = document.getElementById('send-request-btn');
+        const sendBtnText = document.getElementById('send-btn-text');
+        const sendSpinner = document.getElementById('send-spinner');
+        const statusDiv = document.getElementById('response-status');
+        const statusCodeEl = document.getElementById('status-code');
+        const responseTimeEl = document.getElementById('response-time');
+        const responseBodyPre = document.getElementById('response-body');
+        const responseHeadersPre = document.getElementById('response-headers');
+        const reqTabs = document.querySelectorAll('.tab-button');
+        const reqTabContents = document.querySelectorAll('.tab-content');
+        const resTabs = document.querySelectorAll('.response-tab-button');
+        const resTabContents = document.querySelectorAll('.response-tab-content');
+
+        // --- Tab Switching Logic ---
+        function setupTabs(tabButtons, tabContents) {
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const targetTab = button.dataset.tab || button.dataset.responseTab;
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    tabContents.forEach(content => {
+                        const contentTab = content.dataset.tabContent || content.dataset.responseTabContent;
+                        content.classList.toggle('hidden', contentTab !== targetTab);
+                    });
+                });
+            });
+        }
+        setupTabs(reqTabs, reqTabContents);
+        setupTabs(resTabs, resTabContents);
+
+        // --- Set Loading State ---
+        function setLoading(isLoading) {
+            if (isLoading) {
+                sendBtn.disabled = true;
+                sendBtnText.textContent = 'Sending...';
+                sendSpinner.classList.remove('hidden');
+                statusCodeEl.textContent = '(Sending)';
+                statusCodeEl.className = 'font-mono px-2 py-0.5 rounded text-xs font-semibold bg-gray-200 text-gray-700'; // Reset style
+                responseTimeEl.textContent = '(...)';
+                responseBodyPre.textContent = '';
+                responseHeadersPre.textContent = '';
+            } else {
+                sendBtn.disabled = false;
+                sendBtnText.textContent = 'Send';
+                sendSpinner.classList.add('hidden');
+            }
+        }
+
+         // --- Set Status Display ---
+         function setStatusDisplay(status, statusText, duration) {
+            statusCodeEl.textContent = `${status} ${statusText}`;
+            responseTimeEl.textContent = `${duration} ms`;
+
+            let statusClass = 'bg-gray-200 text-gray-700'; // Default/Info
+            if (status >= 200 && status < 300) statusClass = 'bg-green-100 text-success';
+            else if (status >= 400) statusClass = 'bg-red-100 text-error';
+            else if (status >= 300) statusClass = 'bg-yellow-100 text-warning';
+             else if (status === 0) statusClass = 'bg-red-100 text-error'; // Network Error
+
+            statusCodeEl.className = `font-mono px-2 py-0.5 rounded text-xs font-semibold ${statusClass}`;
+        }
+
+         // --- Format JSON safely ---
+        function formatJson(text) {
+            try {
+                return JSON.stringify(JSON.parse(text), null, 2);
+            } catch (e) {
+                return text; // Return original text if not valid JSON
+            }
+        }
+
+        // --- Send Request Logic ---
+        sendBtn?.addEventListener('click', async () => {
+            const url = urlInput.value.trim();
+            const method = methodSelect.value;
+            if (!url) {
+                 alert("Please enter a Request URL.");
+                 urlInput.focus();
+                 return;
+             }
+             // Validate URL basic structure (not perfect but better than nothing)
+            try { new URL(url); } catch (_) { alert("Invalid URL format."); urlInput.focus(); return; }
+
+
+            setLoading(true);
+
+            const requestOptions = { method: method, headers: {} };
+
+            // Parse Headers
+            try {
+                const headerLines = headersInput.value.split('\n');
+                headerLines.forEach(line => {
+                    const parts = line.match(/^([^:]+):\s*(.*)$/); // Match key: value format
+                    if (parts && parts.length === 3) {
+                        const key = parts[1].trim();
+                        const value = parts[2].trim();
+                        if (key) { // Don't add empty header keys
+                            requestOptions.headers[key] = value;
+                        }
+                    } else if (line.trim()) {
+                        console.warn(`Skipping malformed header line: "${line}"`);
+                    }
+                });
+            } catch (e) {
+                 alert("Error parsing headers. Check format (key: value, one per line).");
+                 setLoading(false);
+                 return;
+            }
+
+
+            // Add Body if applicable
+            if (['POST', 'PUT', 'PATCH'].includes(method) && bodyInput.value) {
+                requestOptions.body = bodyInput.value;
+                 if (!requestOptions.headers['Content-Type'] && bodyInput.value.trim().match(/^[{[].*[}\]]$/s)) {
+                     requestOptions.headers['Content-Type'] = 'application/json;charset=UTF-8';
+                 }
+            }
+
+            try {
+                const startTime = performance.now();
+                const response = await fetch(url, requestOptions);
+                const endTime = performance.now();
+                const duration = (endTime - startTime).toFixed(0);
+
+                setStatusDisplay(response.status, response.statusText, duration);
+
+                // Display Response Headers
+                let headerText = '';
+                response.headers.forEach((value, key) => {
+                    headerText += `${key}: ${value}\n`;
+                });
+                responseHeadersPre.textContent = headerText || '(No headers received)';
+
+                // Display Response Body
+                const contentType = response.headers.get('content-type');
+                let responseBodyText = await response.text(); // Get text first
+
+                if (contentType && contentType.includes('application/json')) {
+                    responseBodyPre.textContent = formatJson(responseBodyText); // Attempt pretty print
+                } else {
+                     responseBodyPre.textContent = responseBodyText || '(Empty response body)';
+                }
+
+            } catch (error) {
+                 console.error('Fetch Error:', error);
+                 setStatusDisplay(0, 'Network Error / CORS', 'N/A'); // Use 0 for network errors
+                 responseBodyPre.textContent = `Fetch Error: ${error.message}\n\nCheck the browser console (F12) for more details, likely a CORS issue or network problem.`;
+                 responseHeadersPre.textContent = '(Request Failed)';
+            } finally {
+                 setLoading(false);
+            }
+        });
+
+    </script>
+</body>
+</html>

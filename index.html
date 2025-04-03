@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -29,6 +30,7 @@
         /* .tool-card.hidden { opacity: 0; transform: scale(0.95); pointer-events: none; } */
     </style>
 </head>
+
 <body class="bg-light-bg font-sans text-dark-text antialiased">
 
     <header class="bg-white shadow-sm">
@@ -44,7 +46,7 @@
         <div class="mb-8 max-w-xl mx-auto">
             <label for="tool-search" class="sr-only">Search Tools</label>
             <input type="search" id="tool-search" placeholder="Search tools by name or description..."
-                   class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
         </div>
 
         <h2 class="text-2xl font-semibold mb-6 text-center text-dark-text">Available Tools</h2>
@@ -56,176 +58,240 @@
 
             <!-- Base64 Converter Card -->
             <a href="base64_converter.html"
-               class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
-               data-tool-id="base64"
-               data-tool-name="Base64 Converter"
-               data-tool-desc="Encode text to Base64 or decode Base64 strings back to text.">
+                class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
+                data-tool-id="base64" data-tool-name="Base64 Converter"
+                data-tool-desc="Encode text to Base64 or decode Base64 strings back to text.">
                 <h3 class="text-xl font-semibold mb-2 text-accent pointer-events-none">Base64 Converter</h3>
-                <p class="text-secondary-text text-sm pointer-events-none">Encode text to Base64 or decode Base64 strings back to text.</p>
+                <p class="text-secondary-text text-sm pointer-events-none">Encode text to Base64 or decode Base64
+                    strings back to text.</p>
             </a>
 
             <!-- URL Encoder/Decoder Card -->
             <a href="url_encoder.html"
-               class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
-               data-tool-id="urlEncoder"
-               data-tool-name="URL Encoder / Decoder"
-               data-tool-desc="Encode/decode strings for safe use within URLs.">
+                class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
+                data-tool-id="urlEncoder" data-tool-name="URL Encoder / Decoder"
+                data-tool-desc="Encode/decode strings for safe use within URLs.">
                 <h3 class="text-xl font-semibold mb-2 text-accent pointer-events-none">URL Encoder / Decoder</h3>
-                <p class="text-secondary-text text-sm pointer-events-none">Encode/decode strings for safe use within URLs.</p>
+                <p class="text-secondary-text text-sm pointer-events-none">Encode/decode strings for safe use within
+                    URLs.</p>
             </a>
 
             <!-- JWT Decoder Card -->
             <a href="jwt_decoder.html"
-               class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
-                data-tool-id="jwtDecoder"
-                data-tool-name="JWT Decoder"
+                class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
+                data-tool-id="jwtDecoder" data-tool-name="JWT Decoder"
                 data-tool-desc="Decode the header and payload of a JSON Web Token (No signature verification).">
                 <h3 class="text-xl font-semibold mb-2 text-accent pointer-events-none">JWT Decoder</h3>
-                <p class="text-secondary-text text-sm pointer-events-none">Decode the header and payload of a JSON Web Token (No signature verification).</p>
+                <p class="text-secondary-text text-sm pointer-events-none">Decode the header and payload of a JSON Web
+                    Token (No signature verification).</p>
             </a>
 
             <!-- UNIX Timestamp Converter Card -->
             <a href="timestamp_converter.html"
-               class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
-                data-tool-id="timestampConverter"
-                data-tool-name="UNIX Timestamp Converter"
+                class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
+                data-tool-id="timestampConverter" data-tool-name="UNIX Timestamp Converter"
                 data-tool-desc="Convert between Unix timestamps and human-readable dates (local/UTC).">
                 <h3 class="text-xl font-semibold mb-2 text-accent pointer-events-none">UNIX Timestamp Converter</h3>
-                <p class="text-secondary-text text-sm pointer-events-none">Convert between Unix timestamps and human-readable dates (local/UTC).</p>
+                <p class="text-secondary-text text-sm pointer-events-none">Convert between Unix timestamps and
+                    human-readable dates (local/UTC).</p>
             </a>
 
             <!-- Color Visualizer Card -->
             <a href="color_visualizer.html"
-               class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
-                data-tool-id="colorVisualizer"
-                data-tool-name="Color Visualizer"
+                class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
+                data-tool-id="colorVisualizer" data-tool-name="Color Visualizer"
                 data-tool-desc="Convert between HEX, RGB, and HSL color formats with a preview.">
                 <h3 class="text-xl font-semibold mb-2 text-accent pointer-events-none">Color Visualizer</h3>
-                <p class="text-secondary-text text-sm pointer-events-none">Convert between HEX, RGB, and HSL color formats with a preview.</p>
+                <p class="text-secondary-text text-sm pointer-events-none">Convert between HEX, RGB, and HSL color
+                    formats with a preview.</p>
             </a>
 
             <!-- Markdown Previewer Card -->
             <a href="markdown_previewer.html"
-               class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
-               data-tool-id="markdownPreviewer"
-               data-tool-name="Markdown Previewer"
-               data-tool-desc="See a live HTML preview of your Markdown text as you type.">
+                class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
+                data-tool-id="markdownPreviewer" data-tool-name="Markdown Previewer"
+                data-tool-desc="See a live HTML preview of your Markdown text as you type.">
                 <h3 class="text-xl font-semibold mb-2 text-accent pointer-events-none">Markdown Previewer</h3>
-                <p class="text-secondary-text text-sm pointer-events-none">See a live HTML preview of your Markdown text as you type.</p>
+                <p class="text-secondary-text text-sm pointer-events-none">See a live HTML preview of your Markdown text
+                    as you type.</p>
             </a>
 
             <!-- UUID Generator Card -->
             <a href="uuid_generator.html"
-               class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
-                data-tool-id="uuidGenerator"
-                data-tool-name="UUID Generator"
+                class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
+                data-tool-id="uuidGenerator" data-tool-name="UUID Generator"
                 data-tool-desc="Generate cryptographically strong Version 4 UUIDs.">
                 <h3 class="text-xl font-semibold mb-2 text-accent pointer-events-none">UUID Generator</h3>
-                <p class="text-secondary-text text-sm pointer-events-none">Generate cryptographically strong Version 4 UUIDs.</p>
+                <p class="text-secondary-text text-sm pointer-events-none">Generate cryptographically strong Version 4
+                    UUIDs.</p>
             </a>
 
             <!-- Char-Word Counter Card -->
             <a href="char_word_counter.html"
-               class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
-                data-tool-id="charWordCounter"
-                data-tool-name="Char-Word Counter"
+                class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
+                data-tool-id="charWordCounter" data-tool-name="Char-Word Counter"
                 data-tool-desc="Count characters, words, and lines in a block of text.">
                 <h3 class="text-xl font-semibold mb-2 text-accent pointer-events-none">Char-Word Counter</h3>
-                <p class="text-secondary-text text-sm pointer-events-none">Count characters, words, and lines in a block of text.</p>
+                <p class="text-secondary-text text-sm pointer-events-none">Count characters, words, and lines in a block
+                    of text.</p>
             </a>
 
             <!-- REGEX Tester Card -->
             <a href="regex_tester.html"
-               class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
-                data-tool-id="regexTester"
-                data-tool-name="REGEX Tester"
+                class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
+                data-tool-id="regexTester" data-tool-name="REGEX Tester"
                 data-tool-desc="Test regular expressions against strings and view the matches found.">
                 <h3 class="text-xl font-semibold mb-2 text-accent pointer-events-none">REGEX Tester</h3>
-                <p class="text-secondary-text text-sm pointer-events-none">Test regular expressions against strings and view the matches found.</p>
+                <p class="text-secondary-text text-sm pointer-events-none">Test regular expressions against strings and
+                    view the matches found.</p>
             </a>
 
             <!-- JSON Validator/Formatter Card -->
             <a href="JSONValidatorFormatter.html"
-               class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
-               data-tool-id="jsonValidatorFormatter"
-               data-tool-name="JSON Validator & Formatter"
-               data-tool-desc="Validate JSON structure and format it with selectable indentation.">
+                class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
+                data-tool-id="jsonValidatorFormatter" data-tool-name="JSON Validator & Formatter"
+                data-tool-desc="Validate JSON structure and format it with selectable indentation.">
                 <h3 class="text-xl font-semibold mb-2 text-accent pointer-events-none">JSON Validator & Formatter</h3>
-                <p class="text-secondary-text text-sm pointer-events-none">Validate JSON structure and format it with selectable indentation.</p>
+                <p class="text-secondary-text text-sm pointer-events-none">Validate JSON structure and format it with
+                    selectable indentation.</p>
             </a>
 
-             <!-- === NEW TOOL CARDS === -->
+            <!-- === NEW TOOL CARDS === -->
 
-             <!-- CSV Converter Card -->
+            <!-- CSV Converter Card -->
             <a href="csv_json_table.html"
-               class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
-               data-tool-id="csvConverter"
-               data-tool-name="CSV Converter & Viewer"
-               data-tool-desc="Convert CSV data to JSON format or view it as an HTML table.">
+                class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
+                data-tool-id="csvConverter" data-tool-name="CSV Converter & Viewer"
+                data-tool-desc="Convert CSV data to JSON format or view it as an HTML table.">
                 <h3 class="text-xl font-semibold mb-2 text-accent pointer-events-none">CSV Converter & Viewer</h3>
-                <p class="text-secondary-text text-sm pointer-events-none">Convert CSV data to JSON format or view it as an HTML table.</p>
+                <p class="text-secondary-text text-sm pointer-events-none">Convert CSV data to JSON format or view it as
+                    an HTML table.</p>
             </a>
 
             <!-- Binary Converter Card -->
             <a href="binary_converter.html"
-               class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
-               data-tool-id="binaryConverter"
-               data-tool-name="Binary Text Converter"
-               data-tool-desc="Convert text to its binary representation (byte-by-byte) and back.">
+                class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
+                data-tool-id="binaryConverter" data-tool-name="Binary Text Converter"
+                data-tool-desc="Convert text to its binary representation (byte-by-byte) and back.">
                 <h3 class="text-xl font-semibold mb-2 text-accent pointer-events-none">Binary Text Converter</h3>
-                <p class="text-secondary-text text-sm pointer-events-none">Convert text to its binary representation (byte-by-byte) and back.</p>
+                <p class="text-secondary-text text-sm pointer-events-none">Convert text to its binary representation
+                    (byte-by-byte) and back.</p>
             </a>
 
             <!-- Hash Generator Card -->
             <a href="hash_generator.html"
-               class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
-               data-tool-id="hashGenerator"
-               data-tool-name="Hash Generator"
-               data-tool-desc="Generate MD5*, SHA-1*, SHA-256, and SHA-512 hashes for text input. (*Requires library for MD5)">
+                class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
+                data-tool-id="hashGenerator" data-tool-name="Hash Generator"
+                data-tool-desc="Generate MD5*, SHA-1*, SHA-256, and SHA-512 hashes for text input. (*Requires library for MD5)">
                 <h3 class="text-xl font-semibold mb-2 text-accent pointer-events-none">Hash Generator</h3>
-                <p class="text-secondary-text text-sm pointer-events-none">Generate MD5*, SHA-1*, SHA-256, and SHA-512 hashes for text input. (*Requires library for MD5)</p>
+                <p class="text-secondary-text text-sm pointer-events-none">Generate MD5*, SHA-1*, SHA-256, and SHA-512
+                    hashes for text input. (*Requires library for MD5)</p>
             </a>
 
             <!-- Calculator Card -->
             <a href="calculator.html"
-               class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
-               data-tool-id="calculator"
-               data-tool-name="Scientific Calculator"
-               data-tool-desc="Perform basic arithmetic and scientific calculations. (Note: basic implementation)">
+                class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
+                data-tool-id="calculator" data-tool-name="Scientific Calculator"
+                data-tool-desc="Perform basic arithmetic and scientific calculations. (Note: basic implementation)">
                 <h3 class="text-xl font-semibold mb-2 text-accent pointer-events-none">Scientific Calculator</h3>
-                <p class="text-secondary-text text-sm pointer-events-none">Perform basic arithmetic and scientific calculations. (Note: basic implementation)</p>
+                <p class="text-secondary-text text-sm pointer-events-none">Perform basic arithmetic and scientific
+                    calculations. (Note: basic implementation)</p>
             </a>
 
             <!-- Data Visualizer Card -->
             <a href="data_visualizer.html"
-               class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
-               data-tool-id="dataVisualizer"
-               data-tool-name="Data Visualizer (Charts)"
-               data-tool-desc="Create various charts (bar, line, pie, etc.) from simple CSV data using Chart.js.">
+                class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
+                data-tool-id="dataVisualizer" data-tool-name="Data Visualizer (Charts)"
+                data-tool-desc="Create various charts (bar, line, pie, etc.) from simple CSV data using Chart.js.">
                 <h3 class="text-xl font-semibold mb-2 text-accent pointer-events-none">Data Visualizer (Charts)</h3>
-                <p class="text-secondary-text text-sm pointer-events-none">Create various charts (bar, line, pie, etc.) from simple CSV data using Chart.js.</p>
+                <p class="text-secondary-text text-sm pointer-events-none">Create various charts (bar, line, pie, etc.)
+                    from simple CSV data using Chart.js.</p>
             </a>
-            
+
             <!-- CSS Gradient Generator Card -->
             <a href="css_gradient_generator.html"
-               class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
-               data-tool-id="cssGradientGenerator"
-               data-tool-name="CSS Gradient Generator"
-               data-tool-desc="Visually create linear or radial CSS gradients and get the code.">
+                class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
+                data-tool-id="cssGradientGenerator" data-tool-name="CSS Gradient Generator"
+                data-tool-desc="Visually create linear or radial CSS gradients and get the code.">
                 <h3 class="text-xl font-semibold mb-2 text-accent pointer-events-none">CSS Gradient Generator</h3>
-                <p class="text-secondary-text text-sm pointer-events-none">Visually create linear or radial CSS gradients and get the code.</p>
+                <p class="text-secondary-text text-sm pointer-events-none">Visually create linear or radial CSS
+                    gradients and get the code.</p>
+            </a>
+
+            <!-- API Tester Card -->
+            <a href="api_tester.html"
+                class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
+                data-tool-id="apiTester" data-tool-name="API Request Tester"
+                data-tool-desc="Send HTTP requests (GET, POST, etc.) and inspect responses. Subject to CORS.">
+                <h3 class="text-xl font-semibold mb-2 text-accent pointer-events-none">API Request Tester</h3>
+                <p class="text-secondary-text text-sm pointer-events-none">Send HTTP requests (GET, POST, etc.) and
+                    inspect responses. Subject to CORS.</p>
+            </a>
+
+            <!-- Code Formatter/Minifier Card -->
+            <a href="code_formatter_minifier.html"
+                class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
+                data-tool-id="codeFormatterMinifier" data-tool-name="Code Formatter/Minifier (Basic)"
+                data-tool-desc="Format JSON or perform basic whitespace removal/formatting for JS/CSS/HTML.">
+                <h3 class="text-xl font-semibold mb-2 text-accent pointer-events-none">Code Formatter/Minifier (Basic)
+                </h3>
+                <p class="text-secondary-text text-sm pointer-events-none">Format JSON or perform basic whitespace
+                    removal/formatting for JS/CSS/HTML.</p>
+            </a>
+
+            <!-- Dockerfile Generator Card -->
+            <a href="docker_file_generator.html"
+                class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
+                data-tool-id="dockerfileGenerator" data-tool-name="Dockerfile Generator (Basic)"
+                data-tool-desc="Generate starter Dockerfile templates for common environments like .NET, Node, Python.">
+                <h3 class="text-xl font-semibold mb-2 text-accent pointer-events-none">Dockerfile Generator (Basic)</h3>
+                <p class="text-secondary-text text-sm pointer-events-none">Generate starter Dockerfile templates for
+                    common environments like .NET, Node, Python.</p>
+            </a>
+
+            <!-- CSS to Tailwind Converter Card -->
+            <!-- <a href="css_tailwind_converter.html"
+             class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
+             data-tool-id="cssTailwindConverter"
+             data-tool-name="CSS -> Tailwind Converter (Exp.)"
+             data-tool-desc="Experimental: Convert simple CSS rules to potential Tailwind classes. Highly limited.">
+              <h3 class="text-xl font-semibold mb-2 text-accent pointer-events-none">CSS -> Tailwind Converter (Exp.)</h3>
+              <p class="text-secondary-text text-sm pointer-events-none">Experimental: Convert simple CSS rules to potential Tailwind classes. Highly limited.</p>
+          </a> -->
+
+            <!-- Meta Tag Generator Card -->
+            <a href="meta_tag_generator.html"
+                class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
+                data-tool-id="metaTagGenerator" data-tool-name="Meta Tag Generator"
+                data-tool-desc="Generate common HTML meta tags for SEO and Open Graph (social sharing).">
+                <h3 class="text-xl font-semibold mb-2 text-accent pointer-events-none">Meta Tag Generator</h3>
+                <p class="text-secondary-text text-sm pointer-events-none">Generate common HTML meta tags for SEO and
+                    Open Graph (social sharing).</p>
+            </a>
+
+            <!-- Color Palette Generator Card -->
+            <a href="color_palette_generator.html"
+                class="tool-card block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-accent transition duration-300"
+                data-tool-id="colorPaletteGenerator" data-tool-name="Color Palette Generator"
+                data-tool-desc="Create, visualize, save, and export color palettes for your projects. Includes generation rules and management features.">
+                <!-- Updated Description -->
+                <h3 class="text-xl font-semibold mb-2 text-accent pointer-events-none">Color Palette Generator</h3>
+                <!-- Updated Title -->
+                <p class="text-secondary-text text-sm pointer-events-none">Create, visualize, save, and export color
+                    palettes for your projects.</p> <!-- Updated Description -->
             </a>
 
             <!-- End of New Cards -->
 
         </div>
-        <div id="no-results" class="text-center text-secondary-text mt-8 hidden">No tools found matching your search.</div>
+        <div id="no-results" class="text-center text-secondary-text mt-8 hidden">No tools found matching your search.
+        </div>
     </main>
 
     <footer class="bg-dark-text text-light-bg py-6 mt-16">
         <div class="container mx-auto px-6 text-center text-sm">
-            &copy; 2025 Mayank Punghal            
-	</div>
+            &copy; 2025 Mayank Punghal
+        </div>
     </footer>
 
     <script>
@@ -260,9 +326,9 @@
         }
 
         function attachUsageListeners() {
-             // Attach click listener to cards for usage tracking
+            // Attach click listener to cards for usage tracking
             toolCards.forEach(card => {
-                 // Remove existing listener first to prevent duplicates if called multiple times
+                // Remove existing listener first to prevent duplicates if called multiple times
                 card.removeEventListener('click', handleCardClick);
                 card.addEventListener('click', handleCardClick);
             });
@@ -273,16 +339,16 @@
             if (event.currentTarget.classList.contains('tool-card')) {
                 incrementUsageCount(event.currentTarget.dataset.toolId);
             }
-             // Note: Navigation happens naturally after this listener completes
+            // Note: Navigation happens naturally after this listener completes
         }
 
 
-         // --- Sorting ---
+        // --- Sorting ---
         function sortAndRenderTools() {
             if (!toolsGrid) return;
-             // Select cards *inside* this function to get the current state
-             toolCards = Array.from(toolsGrid.getElementsByClassName('tool-card'));
-             if(toolCards.length === 0) return;
+            // Select cards *inside* this function to get the current state
+            toolCards = Array.from(toolsGrid.getElementsByClassName('tool-card'));
+            if (toolCards.length === 0) return;
 
 
             const usageCounts = getUsageCounts();
@@ -347,4 +413,5 @@
     </script>
 
 </body>
+
 </html>

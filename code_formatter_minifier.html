@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Formatter & Minifier (Basic)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { 'sans': ['Lato', 'sans-serif'], }, colors: { 'accent': { 'DEFAULT': '#007ACC', 'dark': '#005f9e' }, 'light-bg': '#f8f9fa', 'dark-text': '#212529', 'secondary-text': '#6c757d', } } } }
+    </script>
+</head>
+<body class="bg-light-bg font-sans text-dark-text antialiased">
+    <header class="bg-white shadow-sm">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-accent">Code Formatter & Minifier (Basic)</h1>
+            <a href="index.html" class="text-sm text-accent hover:underline">&larr; Back to Dashboard</a>
+        </div>
+    </header>
+    <main class="container mx-auto px-6 py-12">
+        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200 max-w-5xl mx-auto">
+            <p class="text-sm text-orange-600 italic mb-4">Note: Provides basic JSON formatting. JS/CSS formatting/minification is very rudimentary. Use dedicated libraries/tools for robust results.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Input -->
+                <div>
+                    <label for="code-input" class="block text-sm font-medium text-secondary-text mb-1">Input Code:</label>
+                    <select id="code-language" class="mb-2 w-full bg-white px-3 py-1 border border-gray-300 rounded text-sm focus:outline-none">
+                        <option value="json" selected>JSON</option>
+                        <option value="javascript">JavaScript (Basic Whitespace)</option>
+                        <option value="css">CSS (Basic Whitespace)</option>
+                        <option value="html">HTML (Basic Whitespace)</option>
+                    </select>
+                    <textarea id="code-input" rows="18" placeholder='Paste your code here...' class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-accent focus:border-accent text-sm font-mono"></textarea>
+                </div>
+                 <!-- Output -->
+                <div>
+                    <label for="code-output" class="block text-sm font-medium text-secondary-text mb-1">Output:</label>
+                    <div class="flex items-center gap-4 mb-2">
+                        <button id="beautify-btn" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs">Beautify / Format</button>
+                        <button id="minify-btn" class="flex-1 bg-purple-500 hover:bg-purple-600 text-white px-3 py-1 rounded text-xs">Minify (Basic)</button>
+                         <select id="json-indent" class="text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none bg-white hidden">
+                             <option value="2" selected>2 Spaces</option>
+                             <option value="4">4 Spaces</option>
+                             <option value="tab">\t (Tab)</option>
+                         </select>
+                    </div>
+                    <textarea id="code-output" rows="18" readonly class="w-full h-[calc(100%-2.5rem)] px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm font-mono"></textarea>
+                </div>
+            </div>
+             <div id="code-error" class="mt-4 text-red-600 text-sm font-semibold"></div>
+        </div>
+    </main>
+    <script>
+        const inputCode = document.getElementById('code-input');
+        const outputCode = document.getElementById('code-output');
+        const langSelect = document.getElementById('code-language');
+        const beautifyBtn = document.getElementById('beautify-btn');
+        const minifyBtn = document.getElementById('minify-btn');
+        const jsonIndentSelect = document.getElementById('json-indent');
+        const errorDiv = document.getElementById('code-error');
+
+        function clearError() { if (errorDiv) errorDiv.textContent = ''; }
+        function showError(message) { if (errorDiv) errorDiv.textContent = message; }
+
+        // Show/hide JSON indent based on language
+        langSelect?.addEventListener('change', () => {
+            jsonIndentSelect.classList.toggle('hidden', langSelect.value !== 'json');
+        });
+
+        // Beautify Logic
+        beautifyBtn?.addEventListener('click', () => {
+            clearError();
+            outputCode.value = '';
+            const code = inputCode.value.trim();
+            const lang = langSelect.value;
+            if (!code) return;
+
+            try {
+                if (lang === 'json') {
+                    let indentValue = jsonIndentSelect.value;
+                    indentValue = (indentValue === 'tab') ? '\t' : parseInt(indentValue, 10);
+                    outputCode.value = JSON.stringify(JSON.parse(code), null, indentValue);
+                } else {
+                     // Basic Beautify: Add newlines after common block closers/semicolons
+                     // This is EXTREMELY basic and language-agnostic.
+                     outputCode.value = code
+                         .replace(/;\s*/g, ';\n')   // Newline after semicolon
+                         .replace(/}\s*/g, '}\n')   // Newline after closing brace
+                         .replace(/{\s*/g, '{\n')   // Newline after opening brace (basic)
+                         .replace(/^\s+/gm, ''); // Remove leading whitespace per line (crude indent removal)
+                     showError('Note: Basic formatting applied. Use dedicated tools for proper language-specific beautification.');
+                }
+            } catch (e) { showError(`Error processing code: ${e.message}`); console.error(e); }
+        });
+
+        // Minify Logic (Very Basic)
+        minifyBtn?.addEventListener('click', () => {
+             clearError();
+            outputCode.value = '';
+            const code = inputCode.value;
+            const lang = langSelect.value;
+            if (!code) return;
+
+             try {
+                 if (lang === 'json') {
+                     // Minify JSON by parsing and stringifying without spaces
+                     outputCode.value = JSON.stringify(JSON.parse(code));
+                 } else if (lang === 'javascript' || lang === 'css' || lang === 'html') {
+                     // VERY Basic Minify: Remove line breaks, multiple spaces, maybe comments (crude)
+                     let minified = code
+                         .replace(/\/\*[\s\S]*?\*\//g, '') // Remove multi-line comments /* ... */
+                         .replace(/\/\/.*/g, '')        // Remove single-line comments // ... (JS/CSS)
+                         .replace(/<!--[\s\S]*?-->/g, '') // Remove HTML comments <!-- ... -->
+                         .replace(/\s*\n\s*/g, '')     // Remove line breaks and surrounding whitespace
+                         .replace(/\s{2,}/g, ' ');      // Replace multiple spaces with one
+                     // Specific needs more careful regex (e.g., space around operators)
+                      outputCode.value = minified.trim();
+                     showError('Note: Basic minification applied (whitespace/comments). Use dedicated tools (Terser, cssnano) for safe and effective minification.');
+                 } else {
+                      outputCode.value = code; // No operation for unknown
+                 }
+             } catch (e) { showError(`Error processing code: ${e.message}`); console.error(e); }
+        });
+
+        // Initial state
+         jsonIndentSelect.classList.toggle('hidden', langSelect.value !== 'json');
+
+    </script>
+</body>
+</html>

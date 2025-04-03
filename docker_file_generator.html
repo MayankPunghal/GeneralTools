@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>.NET Dockerfile Generator</title>
+    <style>
+        /* Basic Reset & Body */
+        *, *::before, *::after { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 15px;
+            background-color: #f4f7f9;
+            color: #333;
+        }
+
+        /* Container & Sections */
+        .container {
+            max-width: 1300px; /* Wider container */
+            margin: 15px auto;
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr; /* Mobile first */
+            gap: 30px;
+        }
+        @media (min-width: 992px) { /* Layout switch */
+             .main-layout { grid-template-columns: minmax(450px, 1fr) minmax(450px, 1fr); }
+             .config-column { order: 1; }
+             .output-column { order: 2; }
+        }
+
+        h1, h2, h3 {
+            color: #2c3e50;
+            margin-top: 0;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e0e6ec;
+        }
+         h1 { text-align: center; border-bottom-width: 2px; color: #5e35b1 /* .NET Purple */;}
+         h3 { font-size: 1.1em; margin-bottom: 15px; color: #34495e; border-bottom: none;}
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+            font-size: 0.9em;
+        }
+        select, input[type="text"], input[type="number"], textarea, button {
+            padding: 9px 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            width: 100%; /* Full width within grid */
+        }
+        textarea {
+            min-height: 80px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9em;
+            resize: vertical;
+        }
+        input[type="checkbox"] {
+            margin-right: 8px;
+            vertical-align: middle;
+            width: auto; /* Override full width */
+        }
+        .checkbox-label {
+            display: inline-flex; /* Align checkbox and text */
+            align-items: center;
+            margin-bottom: 15px;
+            font-weight: normal;
+            color: #333;
+            font-size: 0.95rem;
+            cursor: pointer;
+        }
+        .checkbox-label input[type="checkbox"] { margin-bottom: 0; } /* Fix alignment */
+
+
+        button {
+            background-color: #5e35b1; /* .NET Purple */
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            border: none;
+            margin-top: 5px; /* Space above button */
+        }
+        button:hover { background-color: #4e2a91; }
+        button.secondary { background-color: #1abc9c; } /* Teal */
+        button.secondary:hover { background-color: #16a085; }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Adjusted min width */
+            gap: 15px 20px;
+            margin-bottom: 20px;
+        }
+        .control-group { display: flex; flex-direction: column; }
+        .control-group--checkbox { grid-column: 1 / -1; } /* Span full width */
+
+        .sub-options {
+            padding-left: 25px;
+            margin-top: -10px;
+            margin-bottom: 15px;
+            border-left: 3px solid #e0e6ec;
+             display: none; /* Hidden by default */
+        }
+        .sub-options.visible { display: block; }
+
+        .output-code {
+            background-color: #2d3748; /* Dark background */
+            color: #e2e8f0; /* Light text */
+            padding: 15px 20px;
+            border-radius: 5px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9em;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            min-height: 500px; /* Ensure enough space */
+            max-height: 80vh; /* Limit height */
+            overflow-y: auto;
+            border: 1px solid #4a5568;
+        }
+        .output-column h2 { margin-bottom: 10px; }
+        .output-column button { width: auto; float: right; margin-top: -45px;} /* Position copy button */
+        .info-box {
+            background-color: #eef2f7;
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            color: #4a5568;
+            margin-bottom: 20px;
+            border: 1px solid #d3dce6;
+        }
+         .info-box code { background-color: #d1d5db; padding: 1px 4px; border-radius: 3px;}
+         .hidden { display: none !important; } /* Simple hide */
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>.NET (Core) Dockerfile Generator</h1>
+
+        <div class="main-layout">
+            <div class="config-column">
+                <h2>Configuration</h2>
+
+                <section>
+                    <h3>Application Type & Base Images</h3>
+                     <div class="info-box">Multi-stage builds are strongly recommended for .NET Core.</div>
+                    <div class="controls-grid">
+                        <div class="control-group">
+                            <label for="appType">Application Type:</label>
+                            <select id="appType">
+                                <option value="dotnet-core" selected>.NET Core App (ASP.NET, Worker, etc.)</option>
+                                <!-- <option value="generic-alpine">Generic Alpine</option> -->
+                                <!-- <option value="generic-ubuntu">Generic Ubuntu</option> -->
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label for="dotnetSdkVersion">.NET SDK Version (Builder):</label>
+                            <input type="text" id="dotnetSdkVersion" value="8.0" placeholder="e.g., 8.0, 7.0, 6.0">
+                        </div>
+                        <div class="control-group">
+                            <label for="dotnetRuntimeVersion">.NET Runtime Version (Final):</label>
+                            <input type="text" id="dotnetRuntimeVersion" value="8.0" placeholder="e.g., 8.0, 7.0, 6.0">
+                        </div>
+                         <div class="control-group">
+                            <label for="dotnetRuntimeType">Runtime Type (Final):</label>
+                             <select id="dotnetRuntimeType">
+                                 <option value="aspnet">ASP.NET Core Runtime (Web Apps)</option>
+                                 <option value="runtime">.NET Runtime (Console/Worker)</option>
+                                 <option value="runtime-deps">Runtime Dependencies Only</option>
+                             </select>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="dotnetCoreOptions">
+                    <h3>.NET Core Project Details</h3>
+                    <div class="controls-grid">
+                        <div class="control-group">
+                             <label for="csprojPath">Project File Path (.csproj):</label>
+                             <input type="text" id="csprojPath" value="YourApp/YourApp.csproj" placeholder="relative/path/to/YourApp.csproj">
+                        </div>
+                        <div class="control-group">
+                             <label for="outputDllName">Output DLL Name (no extension):</label>
+                             <input type="text" id="outputDllName" value="YourApp" placeholder="YourApp">
+                        </div>
+                         <div class="control-group">
+                            <label for="workDir">Working Directory:</label>
+                            <input type="text" id="workDir" value="/app">
+                        </div>
+                        <div class="control-group">
+                            <label for="exposePort">Expose Port(s) (comma-separated):</label>
+                            <input type="text" id="exposePort" value="8080, 8443" placeholder="e.g., 8080, 8443">
+                        </div>
+                         <div class="control-group" style="grid-column: 1 / -1;">
+                            <label for="solutionPath">Solution File Path (.sln) (Optional):</label>
+                            <input type="text" id="solutionPath" placeholder="relative/path/to/YourSolution.sln">
+                            <div class="info-box">If provided, `dotnet restore YourSolution.sln` will be used. Otherwise, restore targets the project.</div>
+                        </div>
+                         <div class="control-group--checkbox">
+                             <label for="includeReactBuild" class="checkbox-label">
+                                <input type="checkbox" id="includeReactBuild"> Include React Build? (Assumes integrated frontend)
+                             </label>
+                         </div>
+                         <div class="sub-options" id="reactBuildOptions">
+                             <div class="info-box">Builds React app and assumes `dotnet publish` copies output to `wwwroot`.</div>
+                              <div class="controls-grid">
+                                 <div class="control-group">
+                                     <label for="reactAppFolder">React App Folder Path:</label>
+                                     <input type="text" id="reactAppFolder" value="ClientApp" placeholder="relative/path/to/ReactApp">
+                                 </div>
+                                 <div class="control-group">
+                                     <label for="reactBuildCmd">React Build Command:</label>
+                                     <input type="text" id="reactBuildCmd" value="npm run build">
+                                 </div>
+                             </div>
+                         </div>
+                    </div>
+                </section>
+
+                 <section>
+                     <h3>Advanced Options</h3>
+                     <div class="controls-grid">
+                        <div class="control-group--checkbox">
+                            <input type="checkbox" id="useNonRootUser" checked> <!-- Default ON for .NET -->
+                            <label for="useNonRootUser" class="checkbox-label">
+                                <input type="checkbox" id="useNonRootUser" checked> Run as Non-Root User? (Recommended)
+                            </label>
+                        </div>
+                        <div class="sub-options" id="nonRootUserOptions">
+                             <div class="info-box">Creates 'app' user. Ensure file permissions allow writing logs/data if needed.</div>
+                             <div class="controls-grid">
+                                <div class="control-group">
+                                    <label for="userName">Username:</label>
+                                    <input type="text" id="userName" value="app" readonly> <!-- Fixed for simplicity -->
+                                </div>
+                             </div>
+                        </div>
+
+                         <div class="control-group--checkbox">
+                             <input type="checkbox" id="addHealthcheck">
+                             <label for="addHealthcheck" class="checkbox-label">
+                                <input type="checkbox" id="addHealthcheck"> Add Healthcheck?
+                             </label>
+                         </div>
+                         <div class="sub-options" id="healthcheckOptions">
+                             <div class="info-box">Requires a health check endpoint (e.g., `/healthz`) in your app. Install `curl` if needed.</div>
+                              <div class="controls-grid">
+                                 <div class="control-group">
+                                     <label for="healthcheckCmd">Healthcheck Command:</label>
+                                     <input type="text" id="healthcheckCmd" placeholder='CMD ["curl", "-f", "http://localhost:8080/healthz"]'>
+                                 </div>
+                                 <div class="control-group">
+                                     <label for="healthcheckInterval">Interval (e.g., 15s):</label>
+                                     <input type="text" id="healthcheckInterval" value="15s">
+                                 </div>
+                                 <div class="control-group">
+                                     <label for="healthcheckTimeout">Timeout (e.g., 5s):</label>
+                                     <input type="text" id="healthcheckTimeout" value="5s">
+                                 </div>
+                                 <div class="control-group">
+                                     <label for="healthcheckRetries">Retries:</label>
+                                     <input type="number" id="healthcheckRetries" value="3" min="1">
+                                 </div>
+                                  <div class="control-group--checkbox">
+                                     <label for="installCurl" class="checkbox-label">
+                                        <input type="checkbox" id="installCurl"> Add step to install `curl` (for Alpine/minimal images)?
+                                     </label>
+                                 </div>
+                             </div>
+                         </div>
+
+                         <div class="control-group" style="grid-column: 1 / -1;">
+                             <label for="envVars">Environment Variables (VAR=value, one per line):</label>
+                             <textarea id="envVars" placeholder="ASPNETCORE_URLS=http://+:8080;https://+:8443\nASPNETCORE_ENVIRONMENT=Production\nConnectionStrings__DefaultConnection=Server=your_sql_server;Database=your_db;User=..."></textarea>
+                         </div>
+                         <div class="control-group" style="grid-column: 1 / -1;">
+                             <label for="buildArgs">Build Arguments (ARG name, one per line):</label>
+                             <textarea id="buildArgs" placeholder="VERSION\nCONFIG_SOURCE"></textarea>
+                         </div>
+                     </div>
+                 </section>
+
+            </div><!-- /.config-column -->
+
+            <div class="output-column">
+                <h2>Generated Dockerfile
+                    <button id="copyButton" class="secondary">Copy Code</button>
+                </h2>
+                <pre id="dockerfileOutput" class="output-code"># Select options to generate Dockerfile...</pre>
+                <div id="copyFeedback" style="float: right; margin-top: 5px; color: green; font-size: 0.9em;"></div>
+            </div><!-- /.output-column -->
+
+        </div><!-- /.main-layout -->
+    </div><!-- /.container -->
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const config = { // Object to hold current selections
+                appType: 'dotnet-core',
+                dotnetSdkVersion: '8.0',
+                dotnetRuntimeVersion: '8.0',
+                dotnetRuntimeType: 'aspnet',
+                csprojPath: 'YourApp/YourApp.csproj',
+                outputDllName: 'YourApp',
+                solutionPath: '',
+                includeReactBuild: false,
+                reactAppFolder: 'ClientApp',
+                reactBuildCmd: 'npm run build',
+                workDir: '/app',
+                exposePort: '8080, 8443',
+                // Advanced (Defaults changed for .NET)
+                useNonRootUser: true,
+                userName: 'app', // Fixed user name for simplicity
+                // userId: '', // Not needed if username is fixed
+                addHealthcheck: false,
+                healthcheckCmd: '',
+                healthcheckInterval: '15s',
+                healthcheckTimeout: '5s',
+                healthcheckRetries: '3',
+                installCurl: false,
+                envVars: 'ASPNETCORE_URLS=http://+:8080;https://+:8443\nASPNETCORE_ENVIRONMENT=Production',
+                buildArgs: '',
+                // Entrypoint/CMD (derived later)
+            };
+
+            // --- Get references to all elements ---
+            const elements = {
+                appType: document.getElementById('appType'),
+                dotnetSdkVersion: document.getElementById('dotnetSdkVersion'),
+                dotnetRuntimeVersion: document.getElementById('dotnetRuntimeVersion'),
+                dotnetRuntimeType: document.getElementById('dotnetRuntimeType'),
+                csprojPath: document.getElementById('csprojPath'),
+                outputDllName: document.getElementById('outputDllName'),
+                solutionPath: document.getElementById('solutionPath'),
+                includeReactBuild: document.getElementById('includeReactBuild'),
+                reactBuildOptions: document.getElementById('reactBuildOptions'),
+                reactAppFolder: document.getElementById('reactAppFolder'),
+                reactBuildCmd: document.getElementById('reactBuildCmd'),
+                workDir: document.getElementById('workDir'),
+                exposePort: document.getElementById('exposePort'),
+                // Advanced
+                useNonRootUser: document.getElementById('useNonRootUser'),
+                nonRootUserOptions: document.getElementById('nonRootUserOptions'),
+                userName: document.getElementById('userName'),
+                // userId: document.getElementById('userId'),
+                addHealthcheck: document.getElementById('addHealthcheck'),
+                healthcheckOptions: document.getElementById('healthcheckOptions'),
+                healthcheckCmd: document.getElementById('healthcheckCmd'),
+                healthcheckInterval: document.getElementById('healthcheckInterval'),
+                healthcheckTimeout: document.getElementById('healthcheckTimeout'),
+                healthcheckRetries: document.getElementById('healthcheckRetries'),
+                installCurl: document.getElementById('installCurl'),
+                envVars: document.getElementById('envVars'),
+                buildArgs: document.getElementById('buildArgs'),
+                // Sections
+                dotnetCoreOptions: document.getElementById('dotnetCoreOptions'),
+                // Output
+                dockerfileOutput: document.getElementById('dockerfileOutput'),
+                copyButton: document.getElementById('copyButton'),
+                copyFeedback: document.getElementById('copyFeedback'),
+            };
+
+            // --- Helper to show/hide elements ---
+            function toggleVisibility(element, isVisible) {
+                 if (!element) return;
+                 element.classList.toggle('hidden', !isVisible);
+                 // Special handling for sub-options which use display block/none
+                 if(element.classList.contains('sub-options')) {
+                      element.style.display = isVisible ? 'block' : 'none';
+                 }
+            }
+
+             // --- Update Options Visibility based on App Type ---
+             function updateAppTypeOptionsVisibility() {
+                 const selectedType = config.appType;
+                 toggleVisibility(elements.dotnetCoreOptions, selectedType === 'dotnet-core');
+                 // Hide others if they existed
+             }
+
+             // --- Update Sub-Options Visibility ---
+            function updateSubOptionsVisibility() {
+                toggleVisibility(elements.reactBuildOptions, config.includeReactBuild);
+                toggleVisibility(elements.nonRootUserOptions, config.useNonRootUser);
+                toggleVisibility(elements.healthcheckOptions, config.addHealthcheck);
+            }
+
+            // --- Main Generation Function ---
+            function generateDockerfile() {
+                if (config.appType !== 'dotnet-core') {
+                    elements.dockerfileOutput.textContent = "# Select .NET Core App type to generate Dockerfile.";
+                    return;
+                }
+
+                let lines = [];
+                const sdkVersion = config.dotnetSdkVersion.trim() || 'latest';
+                const runtimeVersion = config.dotnetRuntimeVersion.trim() || sdkVersion; // Default to same version
+                const runtimeType = config.dotnetRuntimeType.trim();
+                const workDir = config.workDir.trim() || '/app';
+                const csproj = config.csprojPath.trim() || 'YourApp/YourApp.csproj';
+                const sln = config.solutionPath.trim();
+                const outputDll = `${config.outputDllName.trim() || 'YourApp'}.dll`;
+                const reactAppFolder = config.reactAppFolder.trim();
+                const user = config.userName.trim() || 'app'; // Should be 'app' due to readonly input
+
+                lines.push(`# Comments explaining default choices and potential adjustments`);
+                lines.push(`# Base images from Microsoft Artifact Registry (mcr.microsoft.com)`);
+                lines.push(`# Learn more: https://docs.microsoft.com/en-us/dotnet/core/docker/build-container`);
+                lines.push(`# --------------- BUILD STAGE ---------------`);
+                lines.push(`FROM mcr.microsoft.com/dotnet/sdk:${sdkVersion} AS build`);
+                lines.push(`WORKDIR /src`);
+                lines.push(``);
+
+                // Build ARGs
+                config.buildArgs.split('\n').filter(a => a.trim()).forEach(arg => {
+                    lines.push(`ARG ${arg.trim()}`);
+                });
+                if (config.buildArgs.trim()) lines.push(``);
+
+                // Copy project/solution files and restore dependencies
+                lines.push(`# Copy project/solution files and restore dependencies separately`);
+                lines.push(`# Adjust COPY patterns based on your specific project structure`);
+                if (sln) {
+                    lines.push(`COPY ["${sln}", "./"]`);
+                }
+                // Attempt to copy multiple csproj files if using solution, or just the target one
+                 // Heuristic: Copy all csproj in subdirs if sln is present, else just the specified one. Needs user refinement.
+                 if (sln) {
+                     lines.push(`COPY ["*/", "./"]`); // Basic attempt to get subdirs containing csproj
+                     lines.push(`RUN dotnet restore "${sln}"`);
+                 } else {
+                     lines.push(`COPY ["${csproj}", "./${csproj.substring(0, csproj.lastIndexOf('/') + 1)}"]`); // Copy specific csproj to its relative dir
+                     lines.push(`RUN dotnet restore "${csproj}"`);
+                 }
+                lines.push(``);
+
+                // Copy all source code
+                lines.push(`# Copy the rest of the source code`);
+                lines.push(`COPY . .`);
+                lines.push(``);
+
+                // React Build Steps (if included)
+                if (config.includeReactBuild && reactAppFolder) {
+                    lines.push(`# Build React frontend`);
+                    lines.push(`WORKDIR "/src/${reactAppFolder}"`); // Navigate to React app folder
+                    // Try to detect package manager (basic)
+                    if (config.reactBuildCmd.startsWith('yarn')) {
+                        lines.push(`RUN yarn install`);
+                        lines.push(`RUN ${config.reactBuildCmd.trim()}`);
+                    } else { // Assume npm otherwise
+                        lines.push(`RUN npm install`);
+                        lines.push(`RUN ${config.reactBuildCmd.trim()}`);
+                    }
+                    lines.push(`WORKDIR "/src"`); // Go back to the main source directory
+                    lines.push(``);
+                }
+
+                // Publish the .NET application
+                lines.push(`# Publish the application`);
+                lines.push(`RUN dotnet publish "${csproj}" -c Release -o /app/publish /p:UseAppHost=false`);
+                lines.push(``);
+
+                // --------------- FINAL STAGE ---------------
+                lines.push(`# --------------- FINAL STAGE ---------------`);
+                lines.push(`FROM mcr.microsoft.com/dotnet/${runtimeType}:${runtimeVersion}`); // Use selected runtime type
+                lines.push(`WORKDIR ${workDir}`);
+                lines.push(``);
+
+                // Environment Variables (in final stage)
+                 lines.push(`# Configure ASP.NET Core environment and URLs`);
+                config.envVars.split('\n').filter(e => e.trim()).forEach(env => {
+                     lines.push(`ENV ${env.trim().replace('=', ' ')}`); // ENV key value
+                });
+                 // Add common defaults if not present
+                 if (!config.envVars.includes('ASPNETCORE_URLS=')) {
+                     lines.push(`ENV ASPNETCORE_URLS=http://+:8080`); // Default to 8080 if not specified
+                 }
+                 if (!config.envVars.includes('ASPNETCORE_ENVIRONMENT=')) {
+                      lines.push(`ENV ASPNETCORE_ENVIRONMENT=Production`);
+                 }
+                 lines.push(`# Add SQL Server connection string or other secrets via environment variables`);
+                 lines.push(`# Example: ENV ConnectionStrings__DefaultConnection="your_connection_string"`);
+                 lines.push(``);
+
+
+                // Non-Root User setup (in final stage)
+                if (config.useNonRootUser) {
+                    lines.push(`# Create and switch to non-root user`);
+                    lines.push(`RUN adduser -u 5678 --disabled-password --gecos "" ${user} && chown -R ${user} ${workDir}`); // Common Alpine pattern
+                    // Note: Ubuntu/Debian would use: `RUN groupadd --system ${user} && useradd --system --gid ${user} -u 5678 ${user}`
+                    lines.push(`USER ${user}`);
+                    lines.push(``);
+                } else {
+                     lines.push(`# Warning: Running as root user is not recommended!`);
+                }
+
+
+                // Copy published artifacts
+                lines.push(`# Copy published application from build stage`);
+                lines.push(`COPY --from=build /app/publish .`);
+                lines.push(`# Ensure 'dotnet publish' includes static assets (like React build output in wwwroot)`);
+                lines.push(`# If not, you might need an additional COPY command here:`);
+                lines.push(`# COPY --from=build /src/${reactAppFolder}/build ./wwwroot`);
+                lines.push(``);
+
+
+                // Install curl for healthcheck if needed (Alpine example)
+                if(config.addHealthcheck && config.installCurl) {
+                    lines.push(`# Install curl for healthcheck`);
+                    lines.push(`RUN apk add --no-cache curl`);
+                    // Note: Ubuntu/Debian would use: `RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*`
+                    lines.push(``);
+                }
+
+
+                // Expose Port(s)
+                const ports = config.exposePort.split(',').map(p => p.trim()).filter(p => p);
+                if (ports.length > 0) {
+                    ports.forEach(p => lines.push(`EXPOSE ${p}`));
+                    lines.push('');
+                }
+
+
+                // Health Check
+                if (config.addHealthcheck && config.healthcheckCmd.trim()) {
+                    lines.push(`# Healthcheck (requires curl or similar tool and a health endpoint in your app)`);
+                    lines.push(`HEALTHCHECK --interval=${config.healthcheckInterval || '15s'} \\`);
+                    lines.push(`    --timeout=${config.healthcheckTimeout || '5s'} \\`);
+                    lines.push(`    --retries=${config.healthcheckRetries || 3} \\`);
+                    lines.push(`    ${config.healthcheckCmd.trim()}`);
+                    lines.push('');
+                }
+
+                // Entrypoint
+                lines.push(`# Define application entrypoint`);
+                lines.push(`ENTRYPOINT ["dotnet", "${outputDll}"]`);
+                 lines.push(``);
+                 lines.push(`# For Windows Containers (.NET Framework):`);
+                 lines.push(`# Use base images like mcr.microsoft.com/dotnet/framework/aspnet`);
+                 lines.push(`# Use Windows commands (e.g., COPY, RUN powershell ...)`);
+
+
+                // Display
+                elements.dockerfileOutput.textContent = lines.join('\n').replace(/\n\n+/g, '\n\n'); // Prevent excessive blank lines
+            }
+
+
+            // --- Event Listeners ---
+            Object.keys(elements).forEach(key => {
+                const el = elements[key];
+                if (!el || el.classList.contains('output-code') || el.tagName === 'BUTTON') return; // Skip output/buttons
+
+                if (el.tagName === 'INPUT' && el.type === 'checkbox') {
+                    el.addEventListener('change', () => {
+                        config[key] = el.checked;
+                        updateSubOptionsVisibility(); // Update visibility of sub-options
+                        generateDockerfile();
+                    });
+                } else if (el.tagName === 'SELECT' || el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                    const eventType = (el.tagName === 'INPUT' && el.type !== 'number') || el.tagName === 'TEXTAREA' ? 'input' : 'change';
+                    el.addEventListener(eventType, () => {
+                        config[key] = el.value;
+                         if (key === 'appType') { updateAppTypeOptionsVisibility(); } // Special handling
+                         if (key === 'useNonRootUser' || key === 'includeReactBuild' || key === 'addHealthcheck') {
+                             updateSubOptionsVisibility(); // Should already be handled by checkbox listener, but double check
+                         }
+                        generateDockerfile();
+                    });
+                }
+            });
+
+            elements.copyButton.addEventListener('click', () => {
+                navigator.clipboard.writeText(elements.dockerfileOutput.textContent).then(() => {
+                    elements.copyFeedback.textContent = 'Copied!';
+                    setTimeout(() => elements.copyFeedback.textContent = '', 2000);
+                }).catch(err => {
+                    console.error('Failed to copy:', err);
+                    elements.copyFeedback.textContent = 'Copy failed!';
+                     setTimeout(() => elements.copyFeedback.textContent = '', 2000);
+                });
+            });
+
+            // --- Initial Setup ---
+            updateAppTypeOptionsVisibility();
+            updateSubOptionsVisibility();
+            generateDockerfile(); // Generate initial view
+
+        }); // End DOMContentLoaded
+    </script>
+
+</body>
+</html>

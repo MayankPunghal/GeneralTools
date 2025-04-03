@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meta Tag Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { 'sans': ['Lato', 'sans-serif'], }, colors: { 'accent': { 'DEFAULT': '#007ACC', 'dark': '#005f9e' }, 'light-bg': '#f8f9fa', 'dark-text': '#212529', 'secondary-text': '#6c757d', } } } }
+    </script>
+     <style> pre { white-space: pre; font-family: monospace; font-size: 0.875rem;} </style>
+</head>
+<body class="bg-light-bg font-sans text-dark-text antialiased">
+    <header class="bg-white shadow-sm">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-accent">HTML Meta Tag Generator</h1>
+            <a href="index.html" class="text-sm text-accent hover:underline">&larr; Back to Dashboard</a>
+        </div>
+    </header>
+    <main class="container mx-auto px-6 py-12">
+        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200 max-w-4xl mx-auto">
+             <p class="text-sm text-secondary-text italic mb-4">Generate common meta tags for SEO and social media sharing (Open Graph).</p>
+
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                 <!-- Input Fields -->
+                 <div class="space-y-4">
+                     <h3 class="text-lg font-medium text-accent">Page Information</h3>
+                     <div>
+                         <label for="meta-title" class="block text-sm font-medium text-secondary-text mb-1">Page Title:</label>
+                         <input type="text" id="meta-title" placeholder="Your Awesome Page Title" class="w-full input-field">
+                     </div>
+                     <div>
+                         <label for="meta-description" class="block text-sm font-medium text-secondary-text mb-1">Description:</label>
+                         <textarea id="meta-description" rows="3" placeholder="A concise description of the page content (approx. 155 chars)." class="w-full input-field"></textarea>
+                     </div>
+                     <div>
+                         <label for="meta-keywords" class="block text-sm font-medium text-secondary-text mb-1">Keywords (comma-separated):</label>
+                         <input type="text" id="meta-keywords" placeholder="keyword1, keyword2, relevant term" class="w-full input-field">
+                     </div>
+                     <div>
+                         <label for="meta-author" class="block text-sm font-medium text-secondary-text mb-1">Author:</label>
+                         <input type="text" id="meta-author" placeholder="Your Name or Company" class="w-full input-field">
+                     </div>
+                      <h3 class="text-lg font-medium text-accent pt-4 border-t mt-4">Open Graph / Social Media</h3>
+                       <div>
+                         <label for="og-url" class="block text-sm font-medium text-secondary-text mb-1">Canonical URL:</label>
+                         <input type="url" id="og-url" placeholder="https://www.example.com/page-url" class="w-full input-field">
+                     </div>
+                      <div>
+                         <label for="og-image" class="block text-sm font-medium text-secondary-text mb-1">Image URL (for sharing):</label>
+                         <input type="url" id="og-image" placeholder="https://www.example.com/images/share-image.jpg" class="w-full input-field">
+                           <p class="text-xs text-secondary-text mt-1">Recommended: 1200x630px</p>
+                     </div>
+                      <div>
+                         <label for="og-type" class="block text-sm font-medium text-secondary-text mb-1">Page Type:</label>
+                         <select id="og-type" class="w-full input-field bg-white">
+                             <option value="website" selected>website</option>
+                             <option value="article">article</option>
+                             <option value="book">book</option>
+                              <option value="profile">profile</option>
+                             <option value="video.movie">video.movie</option>
+                         </select>
+                     </div>
+                 </div>
+
+                 <!-- Output -->
+                 <div>
+                     <label for="meta-output" class="block text-lg font-medium text-accent mb-2">Generated Meta Tags:</label>
+                     <textarea id="meta-output" rows="20" readonly class="w-full h-[calc(100%-5rem)] px-3 py-2 border border-gray-300 rounded-md bg-gray-900 text-gray-100 text-xs font-mono"></textarea>
+                     <button id="copy-meta-btn" class="mt-4 bg-gray-500 text-white px-3 py-1 rounded-md hover:bg-gray-600 transition duration-300 text-sm" title="Copy Meta Tags">Copy Tags</button>
+                 </div>
+             </div>
+        </div>
+    </main>
+    <script>
+        const inputs = {
+            title: document.getElementById('meta-title'),
+            description: document.getElementById('meta-description'),
+            keywords: document.getElementById('meta-keywords'),
+            author: document.getElementById('meta-author'),
+            ogUrl: document.getElementById('og-url'),
+            ogImage: document.getElementById('og-image'),
+            ogType: document.getElementById('og-type'),
+        };
+        const outputArea = document.getElementById('meta-output');
+        const copyBtn = document.getElementById('copy-meta-btn');
+
+        function generateMetaTags() {
+            let tags = '';
+            const title = inputs.title.value.trim();
+            const description = inputs.description.value.trim();
+            const keywords = inputs.keywords.value.trim();
+            const author = inputs.author.value.trim();
+            const ogUrl = inputs.ogUrl.value.trim();
+            const ogImage = inputs.ogImage.value.trim();
+            const ogType = inputs.ogType.value;
+
+            // Basic Meta
+            tags += `<meta charset="UTF-8">\n`;
+            tags += `<meta name="viewport" content="width=device-width, initial-scale=1.0">\n`;
+            if (title) tags += `<title>${title.replace(/</g, '&lt;')}</title>\n`;
+            if (description) tags += `<meta name="description" content="${description.replace(/"/g, '&quot;')}">\n`;
+            if (keywords) tags += `<meta name="keywords" content="${keywords.replace(/"/g, '&quot;')}">\n`;
+            if (author) tags += `<meta name="author" content="${author.replace(/"/g, '&quot;')}">\n`;
+
+            // Open Graph Meta
+            if (title) tags += `<meta property="og:title" content="${title.replace(/"/g, '&quot;')}" />\n`;
+            if (ogType) tags += `<meta property="og:type" content="${ogType}" />\n`;
+            if (ogUrl) tags += `<meta property="og:url" content="${ogUrl}" />\n`;
+            if (ogImage) tags += `<meta property="og:image" content="${ogImage}" />\n`;
+            if (description) tags += `<meta property="og:description" content="${description.replace(/"/g, '&quot;')}" />\n`;
+            // Optional: Add og:site_name
+            // tags += `<meta property="og:site_name" content="Your Site Name" />\n";
+
+            // Optional: Twitter Card Meta (basic summary card)
+            // tags += `<meta name="twitter:card" content="summary_large_image">\n`;
+            // if (ogUrl) tags += `<meta property="twitter:url" content="${ogUrl}">\n`;
+            // if (title) tags += `<meta property="twitter:title" content="${title.replace(/"/g, '&quot;')}">\n`;
+            // if (description) tags += `<meta property="twitter:description" content="${description.replace(/"/g, '&quot;')}">\n`;
+            // if (ogImage) tags += `<meta property="twitter:image" content="${ogImage}">\n`;
+
+            outputArea.value = tags.trim();
+        }
+
+        // Generate tags whenever any input changes
+        Object.values(inputs).forEach(input => {
+            input?.addEventListener('input', generateMetaTags);
+        });
+
+        // Copy Button
+        copyBtn?.addEventListener('click', () => {
+            if (!outputArea.value) return;
+            navigator.clipboard.writeText(outputArea.value).then(() => {
+                copyBtn.textContent = 'Copied!';
+                setTimeout(() => { copyBtn.textContent = 'Copy Tags'; }, 1500);
+            }).catch(err => { console.error('Copy failed: ', err); alert('Copy failed.'); });
+        });
+
+        // Initial generation
+        generateMetaTags();
+
+    </script>
+      <!-- Simple CSS for builder fields -->
+     <style> .input-field { padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-shadow: inset 0 1px 2px 0 rgb(0 0 0 / 0.05); width: 100%; } textarea.input-field { min-height: 6rem; } </style>
+</body>
+</html>
